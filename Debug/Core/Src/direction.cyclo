@@ -1,0 +1,8 @@
+../Core/Src/direction.c:37:13:Left_Front	1
+../Core/Src/direction.c:43:13:Left_Back	1
+../Core/Src/direction.c:49:13:Left_Stop	1
+../Core/Src/direction.c:55:13:Right_Front	1
+../Core/Src/direction.c:61:13:Right_Back	1
+../Core/Src/direction.c:67:13:Right_Stop	1
+../Core/Src/direction.c:78:6:Direction_Init	1
+../Core/Src/direction.c:83:6:Direction_Set	10

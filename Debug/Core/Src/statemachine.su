@@ -1,0 +1,7 @@
+../Core/Src/statemachine.c:21:6:STMACHINE_Init	8	static
+../Core/Src/statemachine.c:37:6:HAL_UART_RxCpltCallback	16	static
+../Core/Src/statemachine.c:54:13:DC_CONTROL_MANUAL	16	static
+../Core/Src/statemachine.c:103:6:SHOW_UART2	24	static
+../Core/Src/statemachine.c:120:6:DC_CONTROL_AUTO	32	static
+../Core/Src/statemachine.c:211:6:ST_FLAG	16	static
+../Core/Src/statemachine.c:232:6:ST_MACHINE	8	static
