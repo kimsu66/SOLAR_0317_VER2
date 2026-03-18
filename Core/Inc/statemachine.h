@@ -20,7 +20,8 @@
 // KSY
 #include "adc.h"
 #include "temp.h"
-
+#include "gas.h"
+#include "ina219_bms.h"
 
 
 #define Block_Distance_Front 35
@@ -34,8 +35,13 @@
 void STMACHINE_Init(void);
 
 void SHOW_UART2();
-void SHOW_UART2_TEMP(); // KSY temp
+void SHOW_UART2_TEMP();
+void SHOW_UART2_GAS();
+void SHOW_UART2_BMSCurrent();
+
 TEMP_STATE STMACHINE_GetTempState(void);
+GasLevel_t STMACHINE_GetGasState(void);
+BMS_STATE STMACHINE_GetBMSCurrentState(void);
 
 typedef enum
 {

@@ -1,0 +1,7 @@
+../Core/Src/gas.c:28:10:Gas_ReadADC	4	static
+../Core/Src/gas.c:33:10:Gas_ReadADC_Avg	16	static
+../Core/Src/gas.c:46:10:Gas_ADCtoVoltage_mV	16	static
+../Core/Src/gas.c:52:10:Gas_ComputeRs	16	static
+../Core/Src/gas.c:64:10:Gas_ComputePPM	24	static
+../Core/Src/gas.c:86:12:Gas_GetLevelFromPPM	16	static
+../Core/Src/gas.c:93:12:Gas_TaskPPM	24	static

@@ -34,7 +34,29 @@ static const uint32_t tempTaskTick = 100; // /* temp state update period */
 static const uint32_t tempUartTick = 500; // /* temp uart debug print period */
 static uint32_t temp_uart_prevTick = 0;
 
+/* ===== 가스 상태 관리 ===== */
+static GasLevel_t gas_state = GAS_SAFE;
+static uint16_t gas_adc = 0;
+static uint32_t gas_ppm = 0;
 
+static uint32_t gas_prev_tick = 0;
+
+static const uint32_t gasTaskTick = 100; // /* gas state update period */
+
+static const uint32_t gasUartTick = 500; // /* gas uart debug print period */
+static uint32_t gas_uart_prevTick = 0;
+
+/* ===== BMS 상태 관리 ===== */
+static BMS_STATE bms_state = BMS_STATE_SAFE;
+static int32_t bms_voltage_mV = 0;
+static int32_t bms_current_mA = 0;
+
+static uint32_t bms_prev_tick = 0;
+
+static const uint32_t bmsTaskTick = 100; // /* bms state update period */
+
+static const uint32_t bmsUartTick = 500; // /* bms uart debug print period */
+static uint32_t bms_uart_prevTick = 0;
 
 
 /* ================= INIT ================= */
@@ -53,8 +75,11 @@ void STMACHINE_Init(void)
     // 2) PWM Start + 초기 STOP
     Car_Init();
 
-    // ADC INIT
+    // 3) ADC INIT
     HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcValue, 6);
+
+    // 4) INA219 BMS INIT
+    INA219_BMS_Init();
 }
 
 /* ================= UART RX CALLBACK ================= */
@@ -97,8 +122,51 @@ TEMP_STATE STMACHINE_GetTempState(void)
     return temp_state;
 }
 
+/* ================= GAS TASK ================= */
 
+static void GAS_TASK(void)
+{
+    uint32_t now = HAL_GetTick();
 
+    if ((now - gas_prev_tick) < gasTaskTick) return;
+    gas_prev_tick = now;
+
+    gas_adc = Gas_ReadADC_Avg();
+    gas_ppm = Gas_ComputePPM(Gas_ComputeRs(Gas_ADCtoVoltage_mV(gas_adc)));
+    gas_state = Gas_GetLevelFromPPM(gas_ppm);
+}
+
+/* =========================
+ * Gas getter
+ * - 다른 모듈/나중 로직에서 필요하면 사용
+ * ========================= */
+GasLevel_t STMACHINE_GetGasState(void)
+{
+    return gas_state;
+}
+
+/* ================= BMS TASK ================= */
+
+static void INA219_BMS_TASK(void)
+{
+    uint32_t now = HAL_GetTick();
+
+    if ((now - bms_prev_tick) < bmsTaskTick) return;
+    bms_prev_tick = now;
+
+    bms_voltage_mV = INA219_BMS_ReadVoltage_mV();
+    bms_current_mA = INA219_BMS_ReadCurrent_mA();
+    bms_state = INA219_BMS_GetState(bms_voltage_mV, bms_current_mA);
+}
+
+/* =========================
+ * BMS getter
+ * - 다른 모듈/나중 로직에서 필요하면 사용
+ * ========================= */
+BMS_STATE STMACHINE_GetBmsState(void)
+{
+    return bms_state;
+}
 
 
 ///*** MANUAL 모드 로직 ***///
@@ -188,6 +256,67 @@ void SHOW_UART2_TEMP(void)
             break;
 
         case TEMP_STATE_DANGER:
+            printf("DANGER\r\n");
+            break;
+
+        default:
+            printf("UNKNOWN\r\n");
+            break;
+    }
+}
+
+/* ================= GAS DEBUG ================= */
+
+void SHOW_UART2_GAS(void)
+{
+    uint32_t now = HAL_GetTick();
+    if ((now - gas_uart_prevTick) < gasUartTick) return;
+    gas_uart_prevTick = now;
+
+    printf("[GAS] ADC: %u | PPM: %lu | STATE: ", gas_adc, gas_ppm);
+
+    switch (gas_state)
+    {
+        case GAS_SAFE:
+            printf("SAFE\r\n");
+            break;
+
+        case GAS_WARNING:
+            printf("WARNING\r\n");
+            break;
+
+        case GAS_DANGER:
+            printf("DANGER\r\n");
+            break;
+
+        default:
+            printf("UNKNOWN\r\n");
+            break;
+    }
+}
+
+/* ================= BMS DEBUG ================= */
+
+void SHOW_UART2_BMSCurrent(void)
+{
+    uint32_t now = HAL_GetTick();
+    if ((now - bms_uart_prevTick) < bmsUartTick) return;
+    bms_uart_prevTick = now;
+
+    printf("[BMS] V: %ld mV | I: %ld mA | STATE: ",
+           bms_voltage_mV, bms_current_mA);
+
+    switch (bms_state)
+    {
+        case BMS_STATE_SAFE:
+            printf("SAFE\r\n");
+            break;
+
+        case BMS_STATE_WARNING:
+            printf("WARNING\r\n");
+            break;
+
+        case BMS_STATE_DANGER:
             printf("DANGER\r\n");
             break;
 
@@ -315,7 +444,9 @@ void ST_FLAG(uint8_t cmd)
 void ST_MACHINE() {
 
 	/* temp는 stop / manual / auto 전부 공통 감시 */
-	TEMP_TASK();
+//	TEMP_TASK();
+//	GAS_TASK();
+//	INA219_BMS_TASK();
 
 	// BlueTooth UART1 수신
 	if (rxFlag)

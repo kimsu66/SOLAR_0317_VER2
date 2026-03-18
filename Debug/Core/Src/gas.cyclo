@@ -1,0 +1,7 @@
+../Core/Src/gas.c:28:10:Gas_ReadADC	1
+../Core/Src/gas.c:33:10:Gas_ReadADC_Avg	2
+../Core/Src/gas.c:46:10:Gas_ADCtoVoltage_mV	1
+../Core/Src/gas.c:52:10:Gas_ComputeRs	2
+../Core/Src/gas.c:64:10:Gas_ComputePPM	6
+../Core/Src/gas.c:86:12:Gas_GetLevelFromPPM	3
+../Core/Src/gas.c:93:12:Gas_TaskPPM	1
