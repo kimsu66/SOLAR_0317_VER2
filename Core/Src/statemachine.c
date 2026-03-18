@@ -11,12 +11,33 @@
 
 
 extern UART_HandleTypeDef huart1;
+
 static volatile uint8_t rxData[1];
 static volatile uint8_t rxFlag = 0;
 static uint8_t rxCmd = 0;
+
 static AUTO_STATE auto_st = AUTO_STATE_STOP;
 static uint32_t auto_tick = 0;
 
+// ADC value
+uint16_t adcValue[6];
+
+/* ===== 온도 상태 관리 ===== */
+static TEMP_STATE temp_state = TEMP_STATE_SAFE;
+static uint16_t temp_adc = 0;
+static int16_t temp_c = 0;
+
+static uint32_t temp_prev_tick = 0;
+
+static const uint32_t tempTaskTick = 100; // /* temp state update period */
+
+static const uint32_t tempUartTick = 500; // /* temp uart debug print period */
+static uint32_t temp_uart_prevTick = 0;
+
+
+
+
+/* ================= INIT ================= */
 
 void STMACHINE_Init(void)
 {
@@ -31,7 +52,12 @@ void STMACHINE_Init(void)
 
     // 2) PWM Start + 초기 STOP
     Car_Init();
+
+    // ADC INIT
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcValue, 6);
 }
+
+/* ================= UART RX CALLBACK ================= */
 
 // UART 수신 콜백 함수를 여기로 이동
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -45,9 +71,34 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     }
 }
 
-
 // 디버깅 화면에서 관찰할 변수
 uint8_t debug_current_spd = 0;
+
+/* ================= TEMP TASK ================= */
+
+static void TEMP_TASK(void)
+{
+    uint32_t now = HAL_GetTick();
+
+    if ((now - temp_prev_tick) < tempTaskTick) return;
+    temp_prev_tick = now;
+
+    temp_adc = Temp_ReadADC();
+    temp_c   = Temp_CalcCelsius(temp_adc);
+    temp_state = Temp_GetState(temp_c);
+}
+
+/* =========================
+ * Temp getter
+ * - 다른 모듈/나중 로직에서 필요하면 사용
+ * ========================= */
+TEMP_STATE STMACHINE_GetTempState(void)
+{
+    return temp_state;
+}
+
+
+
 
 
 ///*** MANUAL 모드 로직 ***///
@@ -97,6 +148,9 @@ static void DC_CONTROL_MANUAL(uint8_t cmd)
 
 ///*** UART2(테스트용) ***///
 
+
+/* ================= ULTRASONIC DEBUG ================= */
+
 const static uint32_t waitTick = 200;
 static uint32_t prevTick = 0;
 
@@ -113,9 +167,38 @@ void SHOW_UART2()
 }
 
 
+/* ================= TEMP DEBUG ================= */
+
+void SHOW_UART2_TEMP(void)
+{
+    uint32_t now = HAL_GetTick();
+    if ((now - temp_uart_prevTick) < tempUartTick) return;
+    temp_uart_prevTick = now;
+
+    printf("[TEMP] ADC: %u | TEMP: %d C | STATE: ", temp_adc, temp_c);
+
+    switch (temp_state)
+    {
+        case TEMP_STATE_SAFE:
+            printf("SAFE\r\n");
+            break;
+
+        case TEMP_STATE_WARNING:
+            printf("WARNING\r\n");
+            break;
+
+        case TEMP_STATE_DANGER:
+            printf("DANGER\r\n");
+            break;
+
+        default:
+            printf("UNKNOWN\r\n");
+            break;
+    }
+}
 
 
-
+/* ================= AUTO ================= */
 
 void DC_CONTROL_AUTO() {
     Ultrasonic_TriggerAll();
@@ -202,7 +285,7 @@ void DC_CONTROL_AUTO() {
 
 
 
-
+/* ================= MODE FLAG ================= */
 
 static bool st_auto = 0;
 static bool st_manual = 1;
@@ -227,9 +310,13 @@ void ST_FLAG(uint8_t cmd)
 }
 
 
-
+/* ================= MAIN STATE MACHINE ================= */
 
 void ST_MACHINE() {
+
+	/* temp는 stop / manual / auto 전부 공통 감시 */
+	TEMP_TASK();
+
 	// BlueTooth UART1 수신
 	if (rxFlag)
 	{

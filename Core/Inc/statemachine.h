@@ -8,7 +8,7 @@
 #ifndef INC_STATEMACHINE_H_
 #define INC_STATEMACHINE_H_
 
-#include "stdio.h"
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 //#include "ledbar.h"
 #include "speed.h"
@@ -16,6 +16,11 @@
 #include "car.h"
 #include "ultrasonic.h"
 #include "stdbool.h"
+
+// KSY
+#include "adc.h"
+#include "temp.h"
+
 
 
 #define Block_Distance_Front 35
@@ -29,6 +34,8 @@
 void STMACHINE_Init(void);
 
 void SHOW_UART2();
+void SHOW_UART2_TEMP(); // KSY temp
+TEMP_STATE STMACHINE_GetTempState(void);
 
 typedef enum
 {
@@ -43,7 +50,6 @@ typedef enum
 void ST_FLAG(uint8_t cmd);
 void ST_MACHINE();
 void DC_CONTROL_AUTO();
-
 
 
 

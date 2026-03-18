@@ -173,7 +173,8 @@ int main(void)
   {
 
   	ST_MACHINE();
-  	SHOW_UART2();
+//  	SHOW_UART2();
+  	SHOW_UART2_TEMP();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -1,0 +1,5 @@
+../Core/Src/temp.c:27:10:Temp_ReadADC	4	static
+../Core/Src/temp.c:33:16:ln_approx	16	static
+../Core/Src/temp.c:38:9:Temp_CalcCelsius	40	static
+../Core/Src/temp.c:61:12:Temp_GetState	16	static
+../Core/Src/temp.c:74:12:Temp_Task	16	static

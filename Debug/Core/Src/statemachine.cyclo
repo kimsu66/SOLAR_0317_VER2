@@ -1,7 +1,10 @@
-../Core/Src/statemachine.c:21:6:STMACHINE_Init	1
-../Core/Src/statemachine.c:37:6:HAL_UART_RxCpltCallback	2
-../Core/Src/statemachine.c:54:13:DC_CONTROL_MANUAL	10
-../Core/Src/statemachine.c:103:6:SHOW_UART2	2
-../Core/Src/statemachine.c:120:6:DC_CONTROL_AUTO	28
-../Core/Src/statemachine.c:211:6:ST_FLAG	3
-../Core/Src/statemachine.c:232:6:ST_MACHINE	4
+../Core/Src/statemachine.c:42:6:STMACHINE_Init	1
+../Core/Src/statemachine.c:63:6:HAL_UART_RxCpltCallback	2
+../Core/Src/statemachine.c:79:13:TEMP_TASK	2
+../Core/Src/statemachine.c:95:12:STMACHINE_GetTempState	1
+../Core/Src/statemachine.c:105:13:DC_CONTROL_MANUAL	10
+../Core/Src/statemachine.c:157:6:SHOW_UART2	2
+../Core/Src/statemachine.c:172:6:SHOW_UART2_TEMP	6
+../Core/Src/statemachine.c:203:6:DC_CONTROL_AUTO	28
+../Core/Src/statemachine.c:294:6:ST_FLAG	3
+../Core/Src/statemachine.c:315:6:ST_MACHINE	4
