@@ -36,7 +36,7 @@ Core/Src/statemachine.o: ../Core/Src/statemachine.c \
  ../Core/Inc/speed.h ../Core/Inc/tim.h ../Core/Inc/main.h \
  ../Core/Inc/direction.h ../Core/Inc/car.h ../Core/Inc/ultrasonic.h \
  ../Core/Inc/adc.h ../Core/Inc/temp.h ../Core/Inc/gas.h \
- ../Core/Inc/ina219_bms.h ../Core/Inc/i2c.h
+ ../Core/Inc/ina219_bms.h ../Core/Inc/i2c.h ../Core/Inc/trace.h
 ../Core/Inc/statemachine.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -82,3 +82,4 @@ Core/Src/statemachine.o: ../Core/Src/statemachine.c \
 ../Core/Inc/gas.h:
 ../Core/Inc/ina219_bms.h:
 ../Core/Inc/i2c.h:
+../Core/Inc/trace.h:

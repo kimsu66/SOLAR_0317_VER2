@@ -23,6 +23,9 @@
 #include "gas.h"
 #include "ina219_bms.h"
 
+//LSH
+#include "trace.h"
+
 
 #define Block_Distance_Front 35
 #define Block_Distance_Side 20
@@ -38,6 +41,9 @@ void SHOW_UART2();
 void SHOW_UART2_TEMP();
 void SHOW_UART2_GAS();
 void SHOW_UART2_BMSCurrent();
+void SHOW_UART2_SPEED();
+void SHOW_UART2_BMS();
+void SHOW_UART2_TRACE();
 
 TEMP_STATE STMACHINE_GetTempState(void);
 GasLevel_t STMACHINE_GetGasState(void);

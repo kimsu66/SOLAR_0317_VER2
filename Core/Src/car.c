@@ -100,37 +100,14 @@ void Car_MovePercent(car_state_t state, uint8_t percent)
             Speed_SetPercentBoth(percent, percent);
             break;
 
-        /* 좌/우 회전: 좌 50 / 우 0, 좌 0 / 우 50 */
         case CAR_LEFT:
-            Direction_Set(DIR_FRONT);
-            Speed_SetPercentBoth(0, percent);
-            break;
-
-        case CAR_RIGHT:
             Direction_Set(DIR_FRONT);
             Speed_SetPercentBoth(percent, 0);
             break;
 
-        /* 대각 전진: 50/percent, percent/50 */
-        case CAR_LEFTFRONT:
+        case CAR_RIGHT:
             Direction_Set(DIR_FRONT);
-            Speed_SetPercentBoth(percent/3, percent);
-            break;
-
-        case CAR_RIGHTFRONT:
-            Direction_Set(DIR_FRONT);
-            Speed_SetPercentBoth(percent, percent/3);
-            break;
-
-        /* 대각 후진 */
-        case CAR_LEFTBACK:
-            Direction_Set(DIR_BACK);
-            Speed_SetPercentBoth(percent/3, percent);
-            break;
-
-        case CAR_RIGHTBACK:
-            Direction_Set(DIR_BACK);
-            Speed_SetPercentBoth(percent, percent/3);
+            Speed_SetPercentBoth(0, percent);
             break;
 
         default:

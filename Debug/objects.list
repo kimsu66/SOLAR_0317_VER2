@@ -17,6 +17,7 @@
 "./Core/Src/system_stm32f4xx.o"
 "./Core/Src/temp.o"
 "./Core/Src/tim.o"
+"./Core/Src/trace.o"
 "./Core/Src/ultrasonic.o"
 "./Core/Src/usart.o"
 "./Core/Startup/startup_stm32f411retx.o"
