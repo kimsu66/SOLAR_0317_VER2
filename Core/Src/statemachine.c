@@ -76,7 +76,7 @@ void STMACHINE_Init(void)
     Car_Init();
 
     // 3) ADC INIT
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcValue, 6);
+//    HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcValue, 6);
 
     // 4) INA219 BMS INIT
     INA219_BMS_Init();
@@ -176,36 +176,36 @@ static void DC_CONTROL_MANUAL(uint8_t cmd)
     {
         case 'F':
         	debug_current_spd = 100;
-        	Car_Move(CAR_FRONT, SPD_100);
+        	Car_MovePercent(CAR_FRONT, 100);
             break;
         case 'Q':
         	debug_current_spd = 50;
-			Car_Move(CAR_FRONT, SPD_50);
-			break;
+        	Car_MovePercent(CAR_FRONT, 50);
+        	break;
         case 'B':
         	debug_current_spd = 100;
-        	Car_Move(CAR_BACK, SPD_100);
+        	Car_MovePercent(CAR_BACK, 100);
             break;
         case 'W':
         	debug_current_spd = 50;
-			Car_Move(CAR_BACK, SPD_50);
-			break;
+        	Car_MovePercent(CAR_BACK, 50);
+        	break;
         case 'L':
         	debug_current_spd = 100;
-        	Car_Move(CAR_LEFT, SPD_100);
-            break;
+        	Car_MovePercent(CAR_LEFT, 100);
+           break;
         case 'E':
         	debug_current_spd = 50;
-			Car_Move(CAR_LEFT, SPD_50);
-			break;
+        	Car_MovePercent(CAR_LEFT, 50);
+        	break;
         case 'R':
         	debug_current_spd = 100;
-        	Car_Move(CAR_RIGHT, SPD_100);
+        	Car_MovePercent(CAR_RIGHT, 100);
             break;
         case 'T':
         	debug_current_spd = 50;
-			Car_Move(CAR_RIGHT, SPD_50);
-			break;
+        	Car_MovePercent(CAR_RIGHT, 50);
+        	break;
         case 'S':
         	Car_Stop();
         	break;

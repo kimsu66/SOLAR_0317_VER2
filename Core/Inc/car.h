@@ -35,6 +35,7 @@ void Car_Init(void);
 
 /* state + speed(기본 속도)로 주행 */
 void Car_Move(car_state_t state, speed_state_t speed);
+void Car_MovePercent(car_state_t state, uint8_t percent);
 
 
 /* 즉시 정지 */
