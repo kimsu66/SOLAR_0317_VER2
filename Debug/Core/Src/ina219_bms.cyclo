@@ -1,7 +1,7 @@
-../Core/Src/ina219_bms.c:18:26:INA219_BMS_WriteReg	1
-../Core/Src/ina219_bms.c:26:26:INA219_BMS_ReadReg	2
-../Core/Src/ina219_bms.c:38:9:INA219_BMS_Init	3
-../Core/Src/ina219_bms.c:46:9:INA219_BMS_ReadVoltage_mV	2
+../Core/Src/ina219_bms.c:27:26:INA219_BMS_WriteReg	1
+../Core/Src/ina219_bms.c:35:26:INA219_BMS_ReadReg	2
+../Core/Src/ina219_bms.c:47:9:INA219_BMS_Init	3
 ../Core/Src/ina219_bms.c:55:9:INA219_BMS_ReadCurrent_mA	2
-../Core/Src/ina219_bms.c:63:11:INA219_BMS_GetState	5
-../Core/Src/ina219_bms.c:70:11:INA219_BMS_Task	1
+../Core/Src/ina219_bms.c:66:9:INA219_BMS_ReadVoltage_mV	3
+../Core/Src/ina219_bms.c:86:15:INA219_BMS_GetCurrentState	3
+../Core/Src/ina219_bms.c:93:15:INA219_BMS_GetVoltageState	5

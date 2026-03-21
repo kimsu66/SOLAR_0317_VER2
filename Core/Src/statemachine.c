@@ -6,11 +6,13 @@
  */
 
 #include "statemachine.h"
+#include <string.h>
 
 
 
 
 extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart6;
 
 static volatile uint8_t rxData[1];
 static volatile uint8_t rxFlag = 0;
@@ -37,7 +39,7 @@ static uint32_t temp_uart_prevTick = 0;
 /* ===== 가스 상태 관리 ===== */
 static GasLevel_t gas_state = GAS_SAFE;
 static uint16_t gas_adc = 0;
-static uint32_t gas_ppm = 0;
+//static uint32_t gas_ppm = 0;
 
 static uint32_t gas_prev_tick = 0;
 
@@ -47,7 +49,9 @@ static const uint32_t gasUartTick = 500; // /* gas uart debug print period */
 static uint32_t gas_uart_prevTick = 0;
 
 /* ===== BMS 상태 관리 ===== */
-static BMS_STATE bms_state = BMS_STATE_SAFE;
+static VOLTAGE_STATE bms_voltage_state = VOLTAGE_STATE_SAFE;
+static CURRENT_STATE bms_current_state = CURRENT_STATE_SAFE;
+
 static int32_t bms_voltage_mV = 0;
 static int32_t bms_current_mA = 0;
 
@@ -58,11 +62,13 @@ static const uint32_t bmsTaskTick = 100; // /* bms state update period */
 static const uint32_t bmsUartTick = 500; // /* bms uart debug print period */
 static uint32_t bms_uart_prevTick = 0;
 
+/* ===== SPEED MESSAGE ===== */
 int8_t current_speed = 80;
 
 static uint8_t actual_speed = 0;         // 실제 출력중인 속도
 static uint8_t last_danger_count = 0;    // 현재 danger 개수
 static uint8_t last_reduction_step = 0;  // 현재 감속량
+static uint8_t danger_latched = 0;
 
 
 
@@ -88,6 +94,7 @@ void STMACHINE_Init(void)
     // 4) INA219 BMS INIT
     INA219_BMS_Init();
 
+    // 5) Trace servo INIT
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
 }
@@ -123,16 +130,18 @@ static void TEMP_TASK(void)
     temp_state = Temp_GetState(temp_c);
 }
 
-/* =========================
- * Temp getter
- * - 다른 모듈/나중 로직에서 필요하면 사용
- * ========================= */
 TEMP_STATE STMACHINE_GetTempState(void)
 {
     return temp_state;
 }
 
+int16_t STMACHINE_GetTempC(void)
+{
+    return temp_c;
+}
+
 /* ================= GAS TASK ================= */
+static uint16_t gas_score = 0;
 
 static void GAS_TASK(void)
 {
@@ -142,17 +151,26 @@ static void GAS_TASK(void)
     gas_prev_tick = now;
 
     gas_adc = Gas_ReadADC_Avg();
-    gas_ppm = Gas_ComputePPM(Gas_ComputeRs(Gas_ADCtoVoltage_mV(gas_adc)));
-    gas_state = Gas_GetLevelFromPPM(gas_ppm);
+
+//    if (!Gas_IsBaselineReady())
+//    {
+//        Gas_UpdateBaseline();
+//        gas_score = 0;
+//        gas_state = GAS_SAFE;
+//        return;
+//    }
+
+    gas_state = Gas_GetLevelFromADC(gas_adc);
 }
 
-/* =========================
- * Gas getter
- * - 다른 모듈/나중 로직에서 필요하면 사용
- * ========================= */
 GasLevel_t STMACHINE_GetGasState(void)
 {
     return gas_state;
+}
+
+uint16_t STMACHINE_GetGasScore(void)
+{
+    return gas_score;
 }
 
 /* ================= BMS TASK ================= */
@@ -166,16 +184,35 @@ static void INA219_BMS_TASK(void)
 
     bms_voltage_mV = INA219_BMS_ReadVoltage_mV();
     bms_current_mA = INA219_BMS_ReadCurrent_mA();
-    bms_state = INA219_BMS_GetState(bms_voltage_mV, bms_current_mA);
+
+    bms_voltage_state = INA219_BMS_GetVoltageState(bms_voltage_mV);
+    bms_current_state = INA219_BMS_GetCurrentState(bms_current_mA);
 }
 
-/* =========================
- * BMS getter
- * - 다른 모듈/나중 로직에서 필요하면 사용
- * ========================= */
-BMS_STATE STMACHINE_GetBmsState(void)
+VOLTAGE_STATE STMACHINE_GetBmsVoltageState(void)
 {
-    return bms_state;
+    return bms_voltage_state;
+}
+
+CURRENT_STATE STMACHINE_GetBmsCurrentState(void)
+{
+    return bms_current_state;
+}
+
+int32_t STMACHINE_GetBmsVoltagemV(void)
+{
+    return bms_voltage_mV;
+}
+
+int32_t STMACHINE_GetBmsCurrentmA(void)
+{
+    return bms_current_mA;
+}
+
+/* ============== GET SPEED ================ */
+uint8_t STMACHINE_GetActualSpeed(void)
+{
+    return actual_speed;
 }
 
 
@@ -330,7 +367,7 @@ void SHOW_UART2_GAS(void)
     if ((now - gas_uart_prevTick) < gasUartTick) return;
     gas_uart_prevTick = now;
 
-    printf("[GAS] ADC: %u | PPM: %lu | STATE: ", gas_adc, gas_ppm);
+    printf("[GAS] ADC: %u | BASE: %u | SCORE: %u | STATE: ", gas_adc, Gas_GetBaselineADC(), gas_score);
 
     switch (gas_state)
     {
@@ -363,17 +400,17 @@ void SHOW_UART2_BMSCurrent(void)
     printf("[BMS] V: %ld mV | I: %ld mA | STATE: ",
            bms_voltage_mV, bms_current_mA);
 
-    switch (bms_state)
+    switch (bms_current_state)
     {
-        case BMS_STATE_SAFE:
+        case CURRENT_STATE_SAFE:
             printf("SAFE\r\n");
             break;
 
-        case BMS_STATE_WARNING:
+        case CURRENT_STATE_WARNING:
             printf("WARNING\r\n");
             break;
 
-        case BMS_STATE_DANGER:
+        case CURRENT_STATE_DANGER:
             printf("DANGER\r\n");
             break;
 
@@ -394,65 +431,6 @@ void SHOW_UART2_SPEED(void)
     printf("[SPEED] current_speed: %d\r\n", current_speed);
 }
 
-void SHOW_UART2_BMS(void)
-{
-    static uint32_t prev_time = 0;
-    uint32_t now = HAL_GetTick();
-
-    if ((now - prev_time) < 1000) return;
-    prev_time = now;
-
-    if (actual_speed == 0)
-		{
-				printf("[STOP] speed:0");
-
-				if (temp_state == TEMP_STATE_DANGER)
-				{
-						printf(" | TEMP:%dC", temp_c);
-				}
-
-				if (gas_state == GAS_DANGER)
-				{
-						printf(" | GAS:%luppm", gas_ppm);
-				}
-
-				if (bms_state == BMS_STATE_DANGER)
-				{
-						printf(" | CURRENT:%ldmA", bms_current_mA);
-				}
-
-				printf("\r\n");
-				return;
-		}
-
-    if (last_danger_count == 0)
-    {
-        printf("[SAFE] speed:%d\r\n", actual_speed);
-    }
-    else
-    {
-        printf("[DANGER] speed:%d reduction:-%d | ",
-               actual_speed,
-               last_reduction_step);
-
-        if (temp_state == TEMP_STATE_DANGER)
-        {
-            printf("TEMP:%dC ", temp_c);
-        }
-
-        if (gas_state == GAS_DANGER)
-        {
-            printf("GAS:%luppm ", gas_ppm);
-        }
-
-        if (bms_state == BMS_STATE_DANGER)
-        {
-            printf("CURRENT:%ldmA ", bms_current_mA);
-        }
-
-        printf("\r\n");
-    }
-}
 
 void SHOW_UART2_TRACE(void)
 {
@@ -677,44 +655,135 @@ void ST_FLAG(uint8_t cmd)
 /* ================= MAIN STATE MACHINE ================= */
 
 
-static uint8_t GetDangerCount(void)
+static uint8_t GetWarningCount(void)
 {
-    uint8_t danger_count = 0;
+    uint8_t count = 0;
 
-    if (temp_state == TEMP_STATE_DANGER) danger_count++;
-    if (gas_state == GAS_DANGER) danger_count++;
-    if (bms_state == BMS_STATE_DANGER) danger_count++;
+    /* TEMP */
+    if (STMACHINE_GetTempState() == TEMP_STATE_WARNING)
+        count++;
 
-    return danger_count;
+    /* GAS */
+    if (STMACHINE_GetGasState() == GAS_WARNING)
+        count++;
+
+    /* BMS: current or voltage 중 하나라도 warning이면 +1 */
+    if (STMACHINE_GetBmsCurrentState() == CURRENT_STATE_WARNING ||
+        STMACHINE_GetBmsVoltageState() == VOLTAGE_STATE_UNDER_WARNING ||
+				STMACHINE_GetBmsVoltageState() == VOLTAGE_STATE_OVER_WARNING)
+        count++;
+
+    return count;
+}
+
+static uint8_t HasDangerState(void)
+{
+    if (STMACHINE_GetTempState() == TEMP_STATE_DANGER)
+        return 1;
+
+    if (STMACHINE_GetGasState() == GAS_DANGER)
+        return 1;
+
+    if (STMACHINE_GetBmsCurrentState() == CURRENT_STATE_DANGER)
+        return 1;
+
+    if (STMACHINE_GetBmsVoltageState() == VOLTAGE_STATE_UNDER_DANGER)
+            return 1;
+
+    if (STMACHINE_GetBmsVoltageState() == VOLTAGE_STATE_OVER_DANGER)
+        return 1;
+
+    return 0;
+}
+
+
+
+static char danger_reason[64] = "SAFE";
+
+static void UpdateDangerReason(void)
+{
+    danger_reason[0] = '\0';
+
+    if (STMACHINE_GetTempState() == TEMP_STATE_DANGER)
+        strcat(danger_reason, "TEMP ");
+
+    if (STMACHINE_GetGasState() == GAS_DANGER)
+        strcat(danger_reason, "GAS ");
+
+    if (STMACHINE_GetBmsCurrentState() == CURRENT_STATE_DANGER)
+        strcat(danger_reason, "CUR ");
+
+    if (STMACHINE_GetBmsVoltageState() == VOLTAGE_STATE_OVER_DANGER)
+        strcat(danger_reason, "VOLT_OVER");
+
+    if (STMACHINE_GetBmsVoltageState() == VOLTAGE_STATE_UNDER_DANGER)
+            strcat(danger_reason, "VOLT_UNDER");
+
+    if (danger_reason[0] == '\0')
+        strcpy(danger_reason, "UNKNOWN");
+}
+
+const char* STMACHINE_GetDangerReason(void)
+{
+    return danger_reason;
 }
 
 static void UpdateCurrentSpeed(void)
 {
     static uint32_t speed_time = 0;
-    uint8_t danger_count;
+    static uint32_t safe_time = 0;
+
+    uint8_t warning_count;
     uint8_t reduction_step = 0;
+    uint32_t now = HAL_GetTick();
 
-    danger_count = GetDangerCount();
-    last_danger_count = danger_count;
+    warning_count = GetWarningCount();
+    last_danger_count = warning_count;
 
-    if (danger_count == 1)      reduction_step = 1;
-    else if (danger_count == 2) reduction_step = 3;
-    else if (danger_count >= 3) reduction_step = 5;
+    if (warning_count == 1)      reduction_step = 1;
+    else if (warning_count == 2) reduction_step = 3;
+    else if (warning_count >= 3) reduction_step = 5;
 
     last_reduction_step = reduction_step;
 
-    /* 정지 상태면 감속하지 않음 */
     if (actual_speed == 0)
     {
-        speed_time = HAL_GetTick();
+        speed_time = now;
+        safe_time = now;
         return;
     }
 
-    if (danger_count > 0)
+    if (HasDangerState())
     {
-        if (HAL_GetTick() - speed_time >= 1000)   // 감속 주기
+				if (!danger_latched)
+				{
+						UpdateDangerReason();   // 처음 danger 걸릴 때 원인 저장
+				}
+        danger_latched = 1;
+    }
+
+    if (danger_latched)
+    {
+        if (now - speed_time >= 1000)
         {
-            speed_time = HAL_GetTick();
+            speed_time = now;
+
+            if (current_speed > 10)
+                current_speed -= 10;
+            else
+                current_speed = 0;
+        }
+
+        return;
+    }
+
+    if (warning_count > 0)
+    {
+        safe_time = now;
+
+        if (now - speed_time >= 1000)
+        {
+            speed_time = now;
 
             if (current_speed > 30 + reduction_step)
                 current_speed -= reduction_step;
@@ -724,8 +793,49 @@ static void UpdateCurrentSpeed(void)
     }
     else
     {
-        speed_time = HAL_GetTick();
+        if (safe_time == 0)
+            safe_time = now;
+
+        if (now - safe_time >= 5000)
+        {
+            current_speed = 80;
+        }
+
+        speed_time = now;
     }
+}
+
+/* ================= Getstring ================= */
+
+const char* STMACHINE_GetModeString(void)
+{
+    if (st_auto)   // 네 프로젝트에서 auto/manual 구분 플래그에 맞게 수정
+        return "AUTO";
+    else
+        return "MANUAL";
+}
+
+const char* STMACHINE_GetTraceString(void)
+{
+    if (actual_speed == 0)
+        return "ON";
+    else
+        return "OFF";
+}
+
+uint8_t STMACHINE_GetWarningCount(void)
+{
+    return last_danger_count;   // 이름만 기존 변수 유지
+}
+
+uint8_t STMACHINE_GetReductionStep(void)
+{
+    return last_reduction_step;
+}
+
+uint8_t STMACHINE_IsDangerLatched(void)
+{
+    return danger_latched;
 }
 
 static void TRACE_TASK(void)
@@ -761,7 +871,7 @@ void ST_MACHINE() {
 	/* danger 상태에 따른 속도 감속 */
 	UpdateCurrentSpeed();
 
-	// 새 UART 명령 수신 시
+	// 새 UART 명령 수신 시, 계속 새로고침 (for UpdateCurrentSpeed)
 	if (rxFlag)
 	{
 			HAL_UART_Transmit(&huart1, (uint8_t*)&rxCmd, 1, 10);

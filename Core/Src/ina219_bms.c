@@ -9,10 +9,19 @@
 #define INA219_REG_CURRENT   0x04
 #define INA219_REG_CALIB     0x05
 
+#define CURRENT_WARNING 		1500
+#define CURRENT_DANGER	 		2500
+
+#define VOLTAGE_UNDER_DANGER		9500
+#define VOLTAGE_UNDER_WARNING		10000 // mV
+
+#define VOLTAGE_OVER_WARNING		12000
+#define VOLTAGE_OVER_DANGER			13200
+
 static INA219_BMS_t s_bms = {
     .hi2c = &hi2c1,
     .addr = INA219_ADDR,
-    .current_lsb_uA = 100
+		.rshunt_mohm = 100   // 0.1Ω = 100mΩ
 };
 
 static HAL_StatusTypeDef INA219_BMS_WriteReg(uint8_t reg, uint16_t data)
@@ -43,33 +52,50 @@ uint8_t INA219_BMS_Init(void)
     return 1;
 }
 
-int32_t INA219_BMS_ReadVoltage_mV(void)
-{
-    uint16_t raw;
-    if (INA219_BMS_ReadReg(INA219_REG_BUSVOLT, &raw) != HAL_OK) return -1;
-
-    raw >>= 3;
-    return (int32_t)raw * 4;
-}
-
 int32_t INA219_BMS_ReadCurrent_mA(void)
 {
     uint16_t raw;
-    if (INA219_BMS_ReadReg(INA219_REG_CURRENT, &raw) != HAL_OK) return -1;
+    int32_t shunt_uV;
 
-    return ((int16_t)raw * s_bms.current_lsb_uA) / 1000;
+    if (INA219_BMS_ReadReg(INA219_REG_SHUNTVOLT, &raw) != HAL_OK) return -1;
+
+    shunt_uV = (int32_t)((int16_t)raw) * 10;   // 10uV/bit, signed
+    return shunt_uV / s_bms.rshunt_mohm;       // mA
 }
 
-BMS_STATE INA219_BMS_GetState(int32_t voltage_mV, int32_t current_mA)
+int32_t INA219_BMS_ReadVoltage_mV(void)
 {
-    if (current_mA >= 900 || voltage_mV <= 6400) return BMS_STATE_DANGER;
-    if (current_mA >= 800 || voltage_mV <= 6800) return BMS_STATE_WARNING;
-    return BMS_STATE_SAFE;
+		uint16_t raw_bus, raw_shunt;
+		int32_t vbus_mV;
+		int32_t shunt_uV;
+
+		// 1. V- (BUS VOLTAGE)
+		if (INA219_BMS_ReadReg(INA219_REG_BUSVOLT, &raw_bus) != HAL_OK) return -1;
+		raw_bus >>= 3;
+		vbus_mV = (int32_t)raw_bus * 4;   // mV
+
+		// 2. Shunt Voltage (V+ - V-)
+		if (INA219_BMS_ReadReg(INA219_REG_SHUNTVOLT, &raw_shunt) != HAL_OK) return -1;
+		shunt_uV = (int32_t)((int16_t)raw_shunt) * 10;  // uV
+
+		// 3. V+ 계산
+		return vbus_mV + (shunt_uV / 1000);  // mV
 }
 
-BMS_STATE INA219_BMS_Task(void)
+
+CURRENT_STATE INA219_BMS_GetCurrentState(int32_t current_mA)
 {
-    int32_t v = INA219_BMS_ReadVoltage_mV();
-    int32_t i = INA219_BMS_ReadCurrent_mA();
-    return INA219_BMS_GetState(v, i);
+		if (current_mA >= CURRENT_DANGER) return CURRENT_STATE_DANGER;
+    if (current_mA >= CURRENT_WARNING) return CURRENT_STATE_WARNING;
+    return CURRENT_STATE_SAFE;
+}
+
+VOLTAGE_STATE INA219_BMS_GetVoltageState(int32_t voltage_mV)
+{
+		if (voltage_mV <= VOLTAGE_UNDER_DANGER) 	return VOLTAGE_STATE_UNDER_DANGER;
+		if (voltage_mV <= VOLTAGE_UNDER_WARNING) 	return VOLTAGE_STATE_UNDER_WARNING;
+
+    if (voltage_mV >= VOLTAGE_OVER_WARNING)  return VOLTAGE_STATE_OVER_WARNING;
+    if (voltage_mV >= VOLTAGE_OVER_DANGER) 	return VOLTAGE_STATE_OVER_DANGER;
+    return VOLTAGE_STATE_SAFE;
 }

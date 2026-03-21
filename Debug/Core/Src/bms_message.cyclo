@@ -1,0 +1,9 @@
+../Core/Src/bms_message.c:20:6:HAL_UART_TxCpltCallback	2
+../Core/Src/bms_message.c:28:20:TEMP_STATE_STR	5
+../Core/Src/bms_message.c:39:20:GAS_STATE_STR	5
+../Core/Src/bms_message.c:50:20:CURRENT_STATE_STR	5
+../Core/Src/bms_message.c:61:20:VOLTAGE_STATE_STR	6
+../Core/Src/bms_message.c:109:20:SPEED_CTRL_STR	3
+../Core/Src/bms_message.c:134:13:SEND_BMS_STATUS	7
+../Core/Src/bms_message.c:214:6:SHOW_UART2_BMS	1
+../Core/Src/bms_message.c:220:6:SHOW_UART6_BMS	1

@@ -20,22 +20,32 @@
 #include "i2c.h"
 
 typedef enum {
-    BMS_STATE_SAFE = 0,
-    BMS_STATE_WARNING,
-    BMS_STATE_DANGER
-} BMS_STATE;
+		CURRENT_STATE_SAFE = 0,
+		CURRENT_STATE_WARNING,
+		CURRENT_STATE_DANGER
+} CURRENT_STATE;
+
+typedef enum {
+    VOLTAGE_STATE_SAFE = 0,
+		VOLTAGE_STATE_OVER_WARNING,
+		VOLTAGE_STATE_OVER_DANGER,
+		VOLTAGE_STATE_UNDER_WARNING,
+		VOLTAGE_STATE_UNDER_DANGER
+} VOLTAGE_STATE;
 
 typedef struct {
     I2C_HandleTypeDef *hi2c;
     uint8_t addr;
-    int16_t current_lsb_uA;
+    int32_t rshunt_mohm;       // shunt resistor in mΩ
 } INA219_BMS_t;
 
-
 uint8_t INA219_BMS_Init(void);
+
 int32_t INA219_BMS_ReadVoltage_mV(void);
 int32_t INA219_BMS_ReadCurrent_mA(void);
-BMS_STATE INA219_BMS_GetState(int32_t voltage_mV, int32_t current_mA);
-BMS_STATE INA219_BMS_Task(void);
+
+CURRENT_STATE INA219_BMS_GetCurrentState(int32_t current_mA);
+VOLTAGE_STATE INA219_BMS_GetVoltageState(int32_t voltage_mV);
+
 
 #endif /* INC_INA219_BMS_H_ */

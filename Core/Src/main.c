@@ -36,6 +36,7 @@
 //#include "ledbar.h"
 //#include "ultrasonic.h"
 #include "statemachine.h"
+#include "bms_message.h"
 
 /* USER CODE END Includes */
 
@@ -179,7 +180,8 @@ int main(void)
 //  	SHOW_UART2_BMSCurrent();
 //  	SHOW_UART2_SPEED();
   	SHOW_UART2_BMS();
-  	SHOW_UART2_TRACE();
+  	SHOW_UART6_BMS();
+//  	SHOW_UART2_TRACE();
 
     /* USER CODE END WHILE */
 
