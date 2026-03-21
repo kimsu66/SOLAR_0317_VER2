@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include "stm32f4xx_hal.h"
-//#include "ledbar.h"
 #include "speed.h"
 #include "direction.h"
 #include "car.h"
@@ -22,6 +21,9 @@
 #include "temp.h"
 #include "gas2.h"
 #include "ina219_bms.h"
+
+#include "bms_sensor.h"
+#include "bms_safety_manager.h"
 
 //LSH
 #include "trace.h"
@@ -47,33 +49,13 @@ void ST_FLAG(uint8_t cmd);
 void ST_MACHINE();
 void DC_CONTROL_AUTO();
 
-/* ================= DEBUG (기존 유지할 것만) ================= */
-void SHOW_UART2();
-void SHOW_UART2_TEMP();
-void SHOW_UART2_GAS();
-void SHOW_UART2_BMSCurrent();
+/* ================= DEBUG ================= */
+void SHOW_UART2_ULTRASONIC();
 void SHOW_UART2_SPEED();
 void SHOW_UART2_TRACE();
-//void SHOW_UART2_BMS();
 
-/* ================= GETTER ================= */
-TEMP_STATE  STMACHINE_GetTempState(void);
-GasLevel_t  STMACHINE_GetGasState(void);
-VOLTAGE_STATE   STMACHINE_GetBmsVoltageState(void);
-CURRENT_STATE   STMACHINE_GetBmsCurrentState(void);
-
-int16_t     STMACHINE_GetTempC(void);
-uint16_t    STMACHINE_GetGasScore(void);
-int32_t     STMACHINE_GetBmsCurrentmA(void);
-int32_t     STMACHINE_GetBmsVoltagemV(void);
-uint8_t     STMACHINE_GetActualSpeed(void);
-
-const char* STMACHINE_GetModeString(void);
-const char* STMACHINE_GetTraceString(void);
-uint8_t STMACHINE_GetWarningCount(void);
-uint8_t STMACHINE_GetReductionStep(void);
-uint8_t STMACHINE_IsDangerLatched(void);
-
-const char* STMACHINE_GetDangerReason(void);
+const char* GetModeString(void);
+const char* GetTraceString(void);
+uint8_t GetActualSpeed(void);
 
 #endif /* INC_STATEMACHINE_H_ */

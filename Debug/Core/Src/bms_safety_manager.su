@@ -1,0 +1,7 @@
+../Core/Src/bms_safety_manager.c:25:9:GetReductionStep	4	static
+../Core/Src/bms_safety_manager.c:30:9:IsDangerLatched	4	static
+../Core/Src/bms_safety_manager.c:35:9:GetWarningCount	16	static
+../Core/Src/bms_safety_manager.c:56:9:HasDangerState	8	static
+../Core/Src/bms_safety_manager.c:76:13:GetDangerReason	4	static
+../Core/Src/bms_safety_manager.c:81:13:UpdateDangerReasonNow	16	static
+../Core/Src/bms_safety_manager.c:104:6:BMS_SAFETY_UpdateSpeed	32	static

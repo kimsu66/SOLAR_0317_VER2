@@ -1,4 +1,5 @@
-Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
+Core/Src/bms_safety_manager.o: ../Core/Src/bms_safety_manager.c \
+ ../Core/Inc/bms_safety_manager.h ../Core/Inc/bms_sensor.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -32,15 +33,10 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/adc.h ../Core/Inc/main.h ../Core/Inc/dma.h ../Core/Inc/i2c.h \
- ../Core/Inc/tim.h ../Core/Inc/usart.h ../Core/Inc/gpio.h \
- ../Core/Inc/statemachine.h ../Core/Inc/speed.h ../Core/Inc/tim.h \
- ../Core/Inc/direction.h ../Core/Inc/car.h ../Core/Inc/ultrasonic.h \
- ../Core/Inc/adc.h ../Core/Inc/temp.h ../Core/Inc/gas2.h \
- ../Core/Inc/ina219_bms.h ../Core/Inc/i2c.h ../Core/Inc/bms_sensor.h \
- ../Core/Inc/bms_safety_manager.h ../Core/Inc/trace.h \
- ../Core/Inc/bms_message.h ../Core/Inc/statemachine.h
-../Core/Inc/main.h:
+ ../Core/Inc/temp.h ../Core/Inc/main.h ../Core/Inc/adc.h \
+ ../Core/Inc/gas2.h ../Core/Inc/ina219_bms.h ../Core/Inc/i2c.h
+../Core/Inc/bms_safety_manager.h:
+../Core/Inc/bms_sensor.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:
@@ -74,26 +70,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
-../Core/Inc/adc.h:
-../Core/Inc/main.h:
-../Core/Inc/dma.h:
-../Core/Inc/i2c.h:
-../Core/Inc/tim.h:
-../Core/Inc/usart.h:
-../Core/Inc/gpio.h:
-../Core/Inc/statemachine.h:
-../Core/Inc/speed.h:
-../Core/Inc/tim.h:
-../Core/Inc/direction.h:
-../Core/Inc/car.h:
-../Core/Inc/ultrasonic.h:
-../Core/Inc/adc.h:
 ../Core/Inc/temp.h:
+../Core/Inc/main.h:
+../Core/Inc/adc.h:
 ../Core/Inc/gas2.h:
 ../Core/Inc/ina219_bms.h:
 ../Core/Inc/i2c.h:
-../Core/Inc/bms_sensor.h:
-../Core/Inc/bms_safety_manager.h:
-../Core/Inc/trace.h:
-../Core/Inc/bms_message.h:
-../Core/Inc/statemachine.h:

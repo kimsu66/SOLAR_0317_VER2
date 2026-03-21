@@ -71,60 +71,24 @@ static const char* VOLTAGE_STATE_STR(VOLTAGE_STATE state)
     }
 }
 
-//const char* STMACHINE_GetDangerReason(void)
-//{
-//    static char current_reason[64];
-//    static char latched_reason[64] = "UNKNOWN";
-//
-//    current_reason[0] = '\0';
-//
-//    if (STMACHINE_GetTempState() == TEMP_STATE_DANGER)
-//        strcat(current_reason, "TEMP ");
-//
-//    if (STMACHINE_GetGasState() == GAS_DANGER)
-//        strcat(current_reason, "GAS ");
-//
-//    if (STMACHINE_GetBmsVoltageState() == VOLTAGE_STATE_DANGER)
-//        strcat(current_reason, "VOLT ");
-//
-//    if (STMACHINE_GetBmsCurrentState() == CURRENT_STATE_DANGER)
-//        strcat(current_reason, "CUR ");
-//
-//    /* 현재 danger 원인이 있으면 그걸 latched_reason으로 갱신 */
-//    if (current_reason[0] != '\0')
-//    {
-//        strcpy(latched_reason, current_reason);
-//        return latched_reason;
-//    }
-//
-//    /* 현재는 SAFE여도, danger latch 상태면 마지막 danger 원인 유지 */
-//    if (STMACHINE_IsDangerLatched())
-//    {
-//        return latched_reason;
-//    }
-//
-//    return "SAFE";
-//}
-
 static const char* SPEED_CTRL_STR(void)
 {
 		static char ctrl_msg[64];
 
-		if (STMACHINE_IsDangerLatched())
+		if (IsDangerLatched())
 		{
 				snprintf(ctrl_msg, sizeof(ctrl_msg),
 								 "DANGER (%s) -> TO 0",
-								 STMACHINE_GetDangerReason());
+								 GetDangerReason());
 				return ctrl_msg;
 		}
 
-    if (STMACHINE_GetWarningCount() > 0)
+    if (GetWarningCount() > 0)
     {
-        static char ctrl_msg[32];
         snprintf(ctrl_msg, sizeof(ctrl_msg),
                  "WARNING x%d (-%d)",
-                 STMACHINE_GetWarningCount(),
-                 STMACHINE_GetReductionStep());
+                 GetWarningCount(),
+                 GetReductionStep());
         return ctrl_msg;
     }
 
@@ -154,18 +118,17 @@ static void SEND_BMS_STATUS(UART_HandleTypeDef *huart, uint32_t *prev_time)
     	                       "VOLT:%s %ldmV "
     	                       "CUR:%s %ldmA\r\n"
     	                       "<%s>\r\n",
-    	                       STMACHINE_GetModeString(),
-    	                       STMACHINE_GetActualSpeed(),
-    	                       STMACHINE_GetTraceString(),
-    	                       TEMP_STATE_STR(STMACHINE_GetTempState()),
-    	                       STMACHINE_GetTempC(),
-    	                       GAS_STATE_STR(STMACHINE_GetGasState()),
+    	                       GetModeString(),
+    	                       GetActualSpeed(),
+    	                       GetTraceString(),
+    	                       TEMP_STATE_STR(GetTempState()),
+    	                       GetTempC(),
+    	                       GAS_STATE_STR(GetGasState()),
 														 Gas_ReadADC(),
-//    	                       STMACHINE_GetGasScore(),
-    	                       VOLTAGE_STATE_STR(STMACHINE_GetBmsVoltageState()),
-    	                       STMACHINE_GetBmsVoltagemV(),
-    	                       CURRENT_STATE_STR(STMACHINE_GetBmsCurrentState()),
-    	                       STMACHINE_GetBmsCurrentmA(),
+    	                       VOLTAGE_STATE_STR(GetVoltageState()),
+    	                       GetVoltagemV(),
+    	                       CURRENT_STATE_STR(GetCurrentState()),
+    	                       GetCurrentmA(),
     	                       SPEED_CTRL_STR());
 
         if (len > 0)
@@ -192,18 +155,17 @@ static void SEND_BMS_STATUS(UART_HandleTypeDef *huart, uint32_t *prev_time)
                                "VOLT:%s %ldmV "
                                "CUR:%s %ldmA\r\n"
                                "<%s>\r\n",
-                               STMACHINE_GetModeString(),
-                               STMACHINE_GetActualSpeed(),
-                               STMACHINE_GetTraceString(),
-                               TEMP_STATE_STR(STMACHINE_GetTempState()),
-                               STMACHINE_GetTempC(),
-                               GAS_STATE_STR(STMACHINE_GetGasState()),
+                               GetModeString(),
+                               GetActualSpeed(),
+                               GetTraceString(),
+                               TEMP_STATE_STR(GetTempState()),
+                               GetTempC(),
+                               GAS_STATE_STR(GetGasState()),
 															 Gas_ReadADC(),
-//                               STMACHINE_GetGasScore(),
-                               VOLTAGE_STATE_STR(STMACHINE_GetBmsVoltageState()),
-                               STMACHINE_GetBmsVoltagemV(),
-                               CURRENT_STATE_STR(STMACHINE_GetBmsCurrentState()),
-                               STMACHINE_GetBmsCurrentmA(),
+                               VOLTAGE_STATE_STR(GetVoltageState()),
+                               GetVoltagemV(),
+                               CURRENT_STATE_STR(GetCurrentState()),
+                               GetCurrentmA(),
                                SPEED_CTRL_STR());
 
 

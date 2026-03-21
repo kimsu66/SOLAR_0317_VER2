@@ -1,5 +1,7 @@
 "./Core/Src/adc.o"
 "./Core/Src/bms_message.o"
+"./Core/Src/bms_safety_manager.o"
+"./Core/Src/bms_sensor.o"
 "./Core/Src/car.o"
 "./Core/Src/delay.o"
 "./Core/Src/direction.o"

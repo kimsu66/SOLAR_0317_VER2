@@ -13,6 +13,8 @@
 #include "gas2.h"
 #include "ina219_bms.h"
 #include "statemachine.h"
+#include "bms_sensor.h"
+#include "bms_safety_manager.h"
 
 void SHOW_UART2_BMS(void);
 void SHOW_UART6_BMS(void);

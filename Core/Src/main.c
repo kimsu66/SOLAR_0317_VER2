@@ -28,13 +28,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-//#include "car.h"
-//#include "direction.h"
-//#include "speed.h"
-//#include "delay.h"
-//#include "stdio.h"
-//#include "ledbar.h"
-//#include "ultrasonic.h"
 #include "statemachine.h"
 #include "bms_message.h"
 
@@ -174,10 +167,7 @@ int main(void)
   {
 
   	ST_MACHINE();
-//  	SHOW_UART2();
-//  	SHOW_UART2_TEMP();
-//  	SHOW_UART2_GAS();
-//  	SHOW_UART2_BMSCurrent();
+//  	SHOW_UART2_ULTRASONIC();
 //  	SHOW_UART2_SPEED();
   	SHOW_UART2_BMS();
   	SHOW_UART6_BMS();

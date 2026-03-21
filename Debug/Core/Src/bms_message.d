@@ -36,7 +36,8 @@ Core/Src/bms_message.o: ../Core/Src/bms_message.c \
  ../Core/Inc/temp.h ../Core/Inc/adc.h ../Core/Inc/gas2.h \
  ../Core/Inc/ina219_bms.h ../Core/Inc/i2c.h ../Core/Inc/statemachine.h \
  ../Core/Inc/speed.h ../Core/Inc/tim.h ../Core/Inc/direction.h \
- ../Core/Inc/car.h ../Core/Inc/ultrasonic.h ../Core/Inc/trace.h
+ ../Core/Inc/car.h ../Core/Inc/ultrasonic.h ../Core/Inc/bms_sensor.h \
+ ../Core/Inc/bms_safety_manager.h ../Core/Inc/trace.h
 ../Core/Inc/bms_message.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -83,4 +84,6 @@ Core/Src/bms_message.o: ../Core/Src/bms_message.c \
 ../Core/Inc/direction.h:
 ../Core/Inc/car.h:
 ../Core/Inc/ultrasonic.h:
+../Core/Inc/bms_sensor.h:
+../Core/Inc/bms_safety_manager.h:
 ../Core/Inc/trace.h:
