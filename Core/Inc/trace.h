@@ -35,7 +35,6 @@ extern int error_y;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void Trace_Mode();
-//void Trace_Toggle();
 void Trace_ForceInit(void);
 
 

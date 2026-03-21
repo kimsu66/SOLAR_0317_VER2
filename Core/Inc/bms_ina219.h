@@ -12,8 +12,8 @@
  *      현재 상태 반환
  */
 
-#ifndef INC_INA219_BMS_H_
-#define INC_INA219_BMS_H_
+#ifndef INC_BMS_INA219_H_
+#define INC_BMS_INA219_H_
 
 #include "main.h"
 #include <stdint.h>
@@ -48,4 +48,4 @@ CURRENT_STATE INA219_BMS_GetCurrentState(int32_t current_mA);
 VOLTAGE_STATE INA219_BMS_GetVoltageState(int32_t voltage_mV);
 
 
-#endif /* INC_INA219_BMS_H_ */
+#endif /* INC_BMS_INA219_H_ */

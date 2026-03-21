@@ -1,4 +1,4 @@
-#include "ina219_bms.h"
+#include <bms_ina219.h>
 
 #define INA219_ADDR          (0x40 << 1)
 
@@ -18,11 +18,50 @@
 #define VOLTAGE_OVER_WARNING		12000
 #define VOLTAGE_OVER_DANGER			13200
 
+static volatile uint8_t ina219_bms_dma_done = 0;
+static volatile uint8_t ina219_bms_dma_error = 0;
+
 static INA219_BMS_t s_bms = {
     .hi2c = &hi2c1,
     .addr = INA219_ADDR,
 		.rshunt_mohm = 100   // 0.1Ω = 100mΩ
 };
+
+void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c)
+{
+    if (hi2c == s_bms.hi2c)
+    {
+        ina219_bms_dma_done = 1;
+    }
+}
+
+void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
+{
+    if (hi2c == s_bms.hi2c)
+    {
+        ina219_bms_dma_error = 1;
+    }
+}
+
+static HAL_StatusTypeDef INA219_BMS_WaitRxDMA(uint32_t timeout)
+{
+    uint32_t start = HAL_GetTick();
+
+    while (!ina219_bms_dma_done && !ina219_bms_dma_error)
+    {
+        if ((HAL_GetTick() - start) > timeout)
+        {
+            return HAL_TIMEOUT;
+        }
+    }
+
+    if (ina219_bms_dma_error)
+    {
+        return HAL_ERROR;
+    }
+
+    return HAL_OK;
+}
 
 static HAL_StatusTypeDef INA219_BMS_WriteReg(uint8_t reg, uint16_t data)
 {
@@ -34,14 +73,23 @@ static HAL_StatusTypeDef INA219_BMS_WriteReg(uint8_t reg, uint16_t data)
 
 static HAL_StatusTypeDef INA219_BMS_ReadReg(uint8_t reg, uint16_t *data)
 {
-    uint8_t buf[2];
-    HAL_StatusTypeDef ret;
+		static uint8_t buf[2];
 
-    ret = HAL_I2C_Mem_Read(s_bms.hi2c, s_bms.addr, reg, I2C_MEMADD_SIZE_8BIT, buf, 2, 100);
-    if (ret != HAL_OK) return ret;
+		ina219_bms_dma_done = 0;
+		ina219_bms_dma_error = 0;
 
-    *data = ((uint16_t)buf[0] << 8) | buf[1];
-    return HAL_OK;
+		if (HAL_I2C_Mem_Read_DMA(s_bms.hi2c, s_bms.addr, reg, I2C_MEMADD_SIZE_8BIT, buf, 2) != HAL_OK)
+		{
+				return HAL_ERROR;
+		}
+
+		if (INA219_BMS_WaitRxDMA(100) != HAL_OK)
+		{
+				return HAL_ERROR;
+		}
+
+		*data = ((uint16_t)buf[0] << 8) | buf[1];
+		return HAL_OK;
 }
 
 uint8_t INA219_BMS_Init(void)

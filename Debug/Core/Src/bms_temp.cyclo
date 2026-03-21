@@ -1,0 +1,5 @@
+../Core/Src/bms_temp.c:27:10:Temp_ReadADC	1
+../Core/Src/bms_temp.c:33:16:ln_approx	1
+../Core/Src/bms_temp.c:38:9:Temp_CalcCelsius	3
+../Core/Src/bms_temp.c:61:12:Temp_GetState	3
+../Core/Src/bms_temp.c:74:12:Temp_Task	1

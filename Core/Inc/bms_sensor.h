@@ -12,12 +12,12 @@
 #ifndef INC_BMS_SENSOR_H_
 #define INC_BMS_SENSOR_H_
 
+#include <bms_gas.h>
+#include <bms_ina219.h>
+#include <bms_temp.h>
 #include <stdint.h>
 #include "stm32f4xx_hal.h"
 
-#include "temp.h"
-#include "gas2.h"
-#include "ina219_bms.h"
 
 void BMS_SENSOR_Init(void);
 void BMS_SENSOR_Task(void);

@@ -1,7 +1,0 @@
-../Core/Src/ina219_bms.c:27:26:INA219_BMS_WriteReg	40	static
-../Core/Src/ina219_bms.c:35:26:INA219_BMS_ReadReg	40	static
-../Core/Src/ina219_bms.c:47:9:INA219_BMS_Init	8	static
-../Core/Src/ina219_bms.c:55:9:INA219_BMS_ReadCurrent_mA	16	static
-../Core/Src/ina219_bms.c:66:9:INA219_BMS_ReadVoltage_mV	24	static
-../Core/Src/ina219_bms.c:86:15:INA219_BMS_GetCurrentState	16	static
-../Core/Src/ina219_bms.c:93:15:INA219_BMS_GetVoltageState	16	static

@@ -1,4 +1,4 @@
-Core/Src/ina219_bms.o: ../Core/Src/ina219_bms.c ../Core/Inc/ina219_bms.h \
+Core/Src/bms_temp.o: ../Core/Src/bms_temp.c ../Core/Inc/bms_temp.h \
  ../Core/Inc/main.h ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -32,8 +32,8 @@ Core/Src/ina219_bms.o: ../Core/Src/ina219_bms.c ../Core/Inc/ina219_bms.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/i2c.h
-../Core/Inc/ina219_bms.h:
+ ../Core/Inc/adc.h
+../Core/Inc/bms_temp.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -68,4 +68,4 @@ Core/Src/ina219_bms.o: ../Core/Src/ina219_bms.c ../Core/Inc/ina219_bms.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
-../Core/Inc/i2c.h:
+../Core/Inc/adc.h:

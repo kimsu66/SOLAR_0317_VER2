@@ -19,18 +19,6 @@ void Trace_ForceInit(void)
     mode = MODE_INIT;
 }
 
-//void Trace_Toggle(void)
-//{
-//    initflag = !initflag;
-//
-//    if (initflag)
-//        mode = MODE_ACT;
-//    else
-//        mode = MODE_INIT;
-//}
-
-
-
 // 10개의 adc값을 모아서 개수만큼 나눈 평균값을 사용(노이즈 제거)
 void Sensor_Filter()
 {
@@ -97,8 +85,8 @@ void Servo_Move()
   if(tilt < target_tilt) tilt++;
   else if(tilt > target_tilt) tilt--;
 
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pan);
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, tilt);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pan);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, tilt);
 }
 
 uint32_t sensor_time = 0;
@@ -126,13 +114,6 @@ void Trace_Act()
     sensor_time = HAL_GetTick();
 
     Sensor_Filter();
-    // 동작중 변수값을 알기 위한 moserial 송출 코드, 없어도 됌
-    printf("----------------------------------------\r\n");
-    printf("ADC : %d | %d | ", S1, S2);
-    printf("%d | %d\r\n", S3, S4);
-    printf("X : %d | Y : %d\r\n", error_x, error_y);
-    printf("----------------------------------------\r\n");
-
     Sun_Position();
 
     Target_Update();

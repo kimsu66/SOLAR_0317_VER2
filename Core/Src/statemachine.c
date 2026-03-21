@@ -396,6 +396,7 @@ void DC_CONTROL_AUTO_PERCENT() {
         case AUTO_STATE_BACK:
             if (current_Tick - auto_tick >= 250) {
                 Car_Stop();
+                actual_speed = 0;
                 auto_st = AUTO_STATE_SCAN;
             }
             break;
@@ -420,8 +421,8 @@ void ST_FLAG(uint8_t cmd)
             st_auto = 0;
             st_manual = 1;
             auto_st = AUTO_STATE_SCAN;
-            actual_speed = 0;
             Car_Stop();
+            actual_speed = 0;
         }
         else
         {
@@ -429,8 +430,8 @@ void ST_FLAG(uint8_t cmd)
             st_auto = 1;
             st_manual = 0;
             auto_st = AUTO_STATE_SCAN;
-            actual_speed = 0;
             Car_Stop();
+            actual_speed = 0;
             Trace_ForceInit();   // auto에서는 trace 무조건 init
         }
     }
@@ -438,13 +439,13 @@ void ST_FLAG(uint8_t cmd)
     if (cmd == 'P')
     {
         // 시스템 전체 초기화
-        Car_Stop();
-
         st_auto = 0;
         st_manual = 1;
         auto_st = AUTO_STATE_SCAN;
 
+        Car_Stop();
         actual_speed = 0;
+
         current_speed = INIT_SPEED;
 
         BMS_SAFETY_Reset();
@@ -457,6 +458,7 @@ void ST_FLAG(uint8_t cmd)
 
 
 /* ================= Getstring ================= */
+// bms_message에 쓸 상태를 위해 char 문자열 반환 및 INT speed 반환
 
 const char* GetModeString(void)
 {

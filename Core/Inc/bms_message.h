@@ -8,10 +8,10 @@
 #ifndef INC_BMS_MESSAGE_H_
 #define INC_BMS_MESSAGE_H_
 
+#include <bms_gas.h>
+#include <bms_ina219.h>
+#include <bms_temp.h>
 #include "main.h"
-#include "temp.h"
-#include "gas2.h"
-#include "ina219_bms.h"
 #include "statemachine.h"
 #include "bms_sensor.h"
 #include "bms_safety_manager.h"

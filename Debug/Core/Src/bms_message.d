@@ -1,5 +1,5 @@
 Core/Src/bms_message.o: ../Core/Src/bms_message.c \
- ../Core/Inc/bms_message.h ../Core/Inc/main.h \
+ ../Core/Inc/bms_message.h ../Core/Inc/bms_gas.h ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -33,13 +33,13 @@ Core/Src/bms_message.o: ../Core/Src/bms_message.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/temp.h ../Core/Inc/adc.h ../Core/Inc/gas2.h \
- ../Core/Inc/ina219_bms.h ../Core/Inc/i2c.h ../Core/Inc/statemachine.h \
- ../Core/Inc/car.h ../Core/Inc/speed.h ../Core/Inc/tim.h \
- ../Core/Inc/direction.h ../Core/Inc/ultrasonic.h \
- ../Core/Inc/bms_safety_manager.h ../Core/Inc/bms_sensor.h \
- ../Core/Inc/trace.h ../Core/Inc/usart.h
+ ../Core/Inc/bms_ina219.h ../Core/Inc/i2c.h ../Core/Inc/bms_temp.h \
+ ../Core/Inc/adc.h ../Core/Inc/statemachine.h ../Core/Inc/car.h \
+ ../Core/Inc/speed.h ../Core/Inc/tim.h ../Core/Inc/direction.h \
+ ../Core/Inc/ultrasonic.h ../Core/Inc/bms_safety_manager.h \
+ ../Core/Inc/bms_sensor.h ../Core/Inc/trace.h ../Core/Inc/usart.h
 ../Core/Inc/bms_message.h:
+../Core/Inc/bms_gas.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -74,11 +74,10 @@ Core/Src/bms_message.o: ../Core/Src/bms_message.c \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
-../Core/Inc/temp.h:
-../Core/Inc/adc.h:
-../Core/Inc/gas2.h:
-../Core/Inc/ina219_bms.h:
+../Core/Inc/bms_ina219.h:
 ../Core/Inc/i2c.h:
+../Core/Inc/bms_temp.h:
+../Core/Inc/adc.h:
 ../Core/Inc/statemachine.h:
 ../Core/Inc/car.h:
 ../Core/Inc/speed.h:

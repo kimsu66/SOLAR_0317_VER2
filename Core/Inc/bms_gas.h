@@ -5,8 +5,8 @@
  *      Author: kimsuyeon
  */
 
-#ifndef INC_GAS2_H_
-#define INC_GAS2_H_
+#ifndef INC_BMS_GAS_H_
+#define INC_BMS_GAS_H_
 
 
 #include "main.h"
@@ -37,4 +37,4 @@ GasLevel_t Gas_GetLevelFromScore(uint16_t score);
 GasLevel_t Gas_GetLevelFromADC(uint16_t adc);
 GasLevel_t Gas_TaskLevel(void);
 
-#endif /* INC_GAS2_H_ */
+#endif /* INC_BMS_GAS_H_ */

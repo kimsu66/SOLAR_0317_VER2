@@ -12,8 +12,8 @@
  *      현재 상태 반환
  */
 
-#ifndef INC_TEMP_H_
-#define INC_TEMP_H_
+#ifndef INC_BMS_TEMP_H_
+#define INC_BMS_TEMP_H_
 
 #include "main.h"
 #include <stdint.h>
@@ -34,4 +34,4 @@ TEMP_STATE Temp_GetState(int16_t temp_c);
 /* 주기적으로 호출해서 현재 temp state만 얻는 함수 */
 TEMP_STATE Temp_Task(void);
 
-#endif /* INC_TEMP_H_ */
+#endif /* INC_BMS_TEMP_H_ */

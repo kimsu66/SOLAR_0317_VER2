@@ -6,7 +6,7 @@
  *
  */
 
-#include "temp.h"
+#include <bms_temp.h>
 
 
 /* threshold */

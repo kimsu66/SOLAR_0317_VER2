@@ -36,8 +36,8 @@ Core/Src/statemachine.o: ../Core/Src/statemachine.c \
  ../Core/Inc/car.h ../Core/Inc/speed.h ../Core/Inc/tim.h \
  ../Core/Inc/main.h ../Core/Inc/direction.h ../Core/Inc/ultrasonic.h \
  ../Core/Inc/adc.h ../Core/Inc/bms_safety_manager.h \
- ../Core/Inc/bms_sensor.h ../Core/Inc/temp.h ../Core/Inc/gas2.h \
- ../Core/Inc/ina219_bms.h ../Core/Inc/i2c.h ../Core/Inc/trace.h \
+ ../Core/Inc/bms_sensor.h ../Core/Inc/bms_gas.h ../Core/Inc/bms_ina219.h \
+ ../Core/Inc/i2c.h ../Core/Inc/bms_temp.h ../Core/Inc/trace.h \
  ../Core/Inc/usart.h
 ../Core/Inc/statemachine.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -82,9 +82,9 @@ Core/Src/statemachine.o: ../Core/Src/statemachine.c \
 ../Core/Inc/adc.h:
 ../Core/Inc/bms_safety_manager.h:
 ../Core/Inc/bms_sensor.h:
-../Core/Inc/temp.h:
-../Core/Inc/gas2.h:
-../Core/Inc/ina219_bms.h:
+../Core/Inc/bms_gas.h:
+../Core/Inc/bms_ina219.h:
 ../Core/Inc/i2c.h:
+../Core/Inc/bms_temp.h:
 ../Core/Inc/trace.h:
 ../Core/Inc/usart.h:
