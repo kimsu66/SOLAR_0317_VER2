@@ -1,62 +1,55 @@
-/*
- * trace.c
- *
- *  Created on: 2026. 3. 16.
- *      Author: kimsuyeon
- */
-
-
-
 #include "trace.h"
 
+Mode mode = MODE_INIT;
+bool initflag = 0;
+
+extern uint16_t adcValue[6];
+uint16_t S1,S2,S3,S4;
+
+int error_x;
+int error_y;
+
+uint16_t sum_array[6];
 uint16_t sensor_buffer[6][FILTER_SIZE];
 uint8_t filter_index = 0;
-uint32_t sum;
 
-uint16_t S1, S2, S3, S4;
-int error_x, error_y;
+void Trace_ForceInit(void)
+{
+    initflag = 0;
+    mode = MODE_INIT;
+}
 
-//// ADC 폴링방법 예시(채널 부족시 사용할 예정)
-//void Read_Sensors()
+//void Trace_Toggle(void)
 //{
-//    uint16_t value[4];
+//    initflag = !initflag;
 //
-//    for(int i=0;i<4;i++)
-//    {
-//        HAL_ADC_Start(&hadc1);
-//        HAL_ADC_PollForConversion(&hadc1,10);
-//        value[i] = HAL_ADC_GetValue(&hadc1);
-//    }
-//
-//    S1 = value[0];
-//    S2 = value[1];
-//    S3 = value[2];
-//    S4 = value[3];
+//    if (initflag)
+//        mode = MODE_ACT;
+//    else
+//        mode = MODE_INIT;
 //}
+
+
 
 // 10개의 adc값을 모아서 개수만큼 나눈 평균값을 사용(노이즈 제거)
 void Sensor_Filter()
 {
-  for(uint8_t i = 2; i < 6; i++) sensor_buffer[i][filter_index] = adcValue[i];
+  for(uint8_t i = 2; i < 6; i++)
+  {
+    sum_array[i] -= sensor_buffer[i][filter_index]; // 이전 값 제거
+    sensor_buffer[i][filter_index] = adcValue[i];   // 새 값 저장
+    sum_array[i] += adcValue[i];                    // 새 값 추가
+  }
+
   filter_index++;
   if(filter_index >= FILTER_SIZE) filter_index = 0;
 
-  sum = 0;
-  for(uint8_t i = 0; i < FILTER_SIZE; i++) sum += sensor_buffer[2][i];
-  S1 = sum / FILTER_SIZE;
-
-  sum = 0;
-  for(uint8_t i = 0; i < FILTER_SIZE; i++) sum += sensor_buffer[3][i];
-  S2 = sum / FILTER_SIZE;
-
-  sum = 0;
-  for(uint8_t i = 0; i < FILTER_SIZE; i++) sum += sensor_buffer[4][i];
-  S3 = sum / FILTER_SIZE;
-
-  sum=0;
-  for(uint8_t i = 0; i < FILTER_SIZE; i++) sum += sensor_buffer[5][i];
-  S4 = sum / FILTER_SIZE;
+  S1 = sum_array[2] / FILTER_SIZE;
+  S2 = sum_array[3] / FILTER_SIZE;
+  S3 = sum_array[4] / FILTER_SIZE;
+  S4 = sum_array[5] / FILTER_SIZE;
 }
+
 
 // 태양 방향 계산
 void Sun_Position()
@@ -70,28 +63,14 @@ void Sun_Position()
   error_x = left - right;
   error_y = top - bottom;
 }
-
-int target_pan  = 70;
-int target_tilt = 70;
+int target_pan;
+int target_tilt;
 
 // 목표 서보각 계산
 void Target_Update()
 {
   if(error_x > THRESHOLD) target_pan--;
   else if(error_x < -THRESHOLD) target_pan++;
-
-//  // 수평면의 서보모터에서 180도 초과 회전이 불가능한 걸 구현하기 위한 테스트 코드
-//  if(error_x > THRESHOLD)
-//  {
-//    if(target_pan >= 20) target_pan--;
-//    else target_tilt++;
-//  }
-//
-//  else if(error_x < -THRESHOLD)
-//  {
-//    if(target_pan <= 120) target_pan++;
-//    else target_tilt--;
-//  }
 
   if(error_y > THRESHOLD) target_tilt++;
   else if(error_y < -THRESHOLD) target_tilt--;
@@ -104,8 +83,10 @@ void Target_Update()
   if(target_tilt > 110) target_tilt = 110;
 }
 
-int pan = 70;
-int tilt = 70;
+//int pan = 70;
+//int tilt = 70;
+int pan;
+int tilt;
 
 // 서보모터 이동 제어
 void Servo_Move()
@@ -116,6 +97,65 @@ void Servo_Move()
   if(tilt < target_tilt) tilt++;
   else if(tilt > target_tilt) tilt--;
 
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pan);
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, tilt);
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pan);
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, tilt);
 }
+
+uint32_t sensor_time = 0;
+uint32_t servo_time = 0;
+
+void Trace_Init()
+{
+  target_pan  = 70;
+  target_tilt = 70;
+
+  // 20ms마다 서보 회전
+  if(HAL_GetTick() - servo_time >= 20)
+  {
+    servo_time = HAL_GetTick();
+
+    Servo_Move();
+  }
+}
+
+void Trace_Act()
+{
+  // 50ms마다 조도 측정
+  if(HAL_GetTick() - sensor_time >= 50)
+  {
+    sensor_time = HAL_GetTick();
+
+    Sensor_Filter();
+    // 동작중 변수값을 알기 위한 moserial 송출 코드, 없어도 됌
+    printf("----------------------------------------\r\n");
+    printf("ADC : %d | %d | ", S1, S2);
+    printf("%d | %d\r\n", S3, S4);
+    printf("X : %d | Y : %d\r\n", error_x, error_y);
+    printf("----------------------------------------\r\n");
+
+    Sun_Position();
+
+    Target_Update();
+  }
+
+  // 20ms마다 서보 회전
+  if(HAL_GetTick() - servo_time >= 20)
+  {
+    servo_time = HAL_GetTick();
+
+    Servo_Move();
+  }
+}
+
+void Trace_Mode()
+{
+  switch (mode) {
+    case MODE_INIT:
+      Trace_Init();
+      break;
+    case MODE_ACT:
+      Trace_Act();
+      break;
+  }
+}
+

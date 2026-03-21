@@ -12,15 +12,13 @@ static uint8_t last_reduction_step = 0;  // 현재 감속량
 static uint8_t danger_latched = 0;
 static char danger_reason[64] = "SAFE";
 
-//const char* GetDangerReason(void)
-//{
-//    return GetDangerReason();
-//}
-
-//uint8_t GetWarningCount(void)
-//{
-//    return last_danger_count;   // 이름만 기존 변수 유지
-//}
+void BMS_SAFETY_Reset(void)
+{
+    last_danger_count = 0;
+    last_reduction_step = 0;
+    danger_latched = 0;
+    strcpy(danger_reason, "SAFE");
+}
 
 uint8_t GetReductionStep(void)
 {
@@ -92,10 +90,10 @@ static void UpdateDangerReasonNow(void)
         strcat(danger_reason, "CUR ");
 
     if (GetVoltageState() == VOLTAGE_STATE_OVER_DANGER)
-        strcat(danger_reason, "VOLT_OVER ");
+        strcat(danger_reason, "V_OVER ");
 
     if (GetVoltageState() == VOLTAGE_STATE_UNDER_DANGER)
-        strcat(danger_reason, "VOLT_UNDER ");
+        strcat(danger_reason, "V_UNDER ");
 
     if (danger_reason[0] == '\0')
         strcpy(danger_reason, "UNKNOWN");
@@ -105,6 +103,7 @@ void BMS_SAFETY_UpdateSpeed(uint8_t actual_speed, int8_t *current_speed)
 {
     static uint32_t speed_time = 0;
     static uint32_t safe_time = 0;
+    static uint32_t recover_time = 0;
 
     uint8_t warning_count;
     uint8_t reduction_step = 0;
@@ -153,6 +152,7 @@ void BMS_SAFETY_UpdateSpeed(uint8_t actual_speed, int8_t *current_speed)
     if (warning_count > 0)
     {
         safe_time = now;
+        recover_time = now;
 
         if (now - speed_time >= 1000)
         {
@@ -169,9 +169,15 @@ void BMS_SAFETY_UpdateSpeed(uint8_t actual_speed, int8_t *current_speed)
         if (safe_time == 0)
             safe_time = now;
 
-        if (now - safe_time >= 5000)
+        if (now - safe_time >= 3000)
         {
-            *current_speed = 80;
+						if (now - recover_time >= 200)   // 200ms마다 +1
+						{
+								recover_time = now;
+
+								if (*current_speed < 80)
+										(*current_speed)++;
+						}
         }
 
         speed_time = now;

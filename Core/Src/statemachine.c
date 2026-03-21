@@ -19,15 +19,16 @@ static uint8_t rxCmd = 0;
 static AUTO_STATE auto_st = AUTO_STATE_STOP;
 static uint32_t auto_tick = 0;
 
+static bool st_auto = 0;
+static bool st_manual = 1;
+
 // ADC value
 uint16_t adcValue[6];
 
-
-/* ===== SPEED MESSAGE ===== */
-int8_t current_speed = 80;
+#define INIT_SPEED 	80
+int8_t current_speed = INIT_SPEED;
 
 static uint8_t actual_speed = 0;         // 실제 출력중인 속도
-
 
 
 /* ================= INIT ================= */
@@ -50,7 +51,6 @@ void STMACHINE_Init(void)
     HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcValue, 6);
 
     // 4) INA219 BMS INIT
-//    INA219_BMS_Init();
     BMS_SENSOR_Init();
 
     // 5) Trace servo INIT
@@ -67,6 +67,23 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
         rxCmd = rxData[0];
         rxFlag = 1;
+
+        if (rxData[0] == 'D') // trace 제약조건 및 toggle 처
+				{
+						if (st_manual && actual_speed == 0 && GetWarningCount() < 3 && !HasDangerState() && !IsDangerLatched())
+						{
+								initflag = !initflag;
+						}
+						else
+						{
+								initflag = 0;
+						}
+
+						if (initflag)
+								mode = MODE_ACT;
+						else
+								mode = MODE_INIT;
+				}
         // 다음 수신 대기
         HAL_UART_Receive_IT(&huart1, (uint8_t *)rxData, 1);
     }
@@ -87,37 +104,37 @@ static void DC_CONTROL_MANUAL(uint8_t cmd)
             break;
         case 'Q':
         	debug_current_spd = 50;
-			Car_Move(CAR_FRONT, SPD_50);
-			break;
+        	Car_Move(CAR_FRONT, SPD_50);
+        	break;
         case 'B':
         	debug_current_spd = 100;
         	Car_Move(CAR_BACK, SPD_100);
             break;
         case 'W':
         	debug_current_spd = 50;
-			Car_Move(CAR_BACK, SPD_50);
-			break;
+        	Car_Move(CAR_BACK, SPD_50);
+        	break;
         case 'L':
         	debug_current_spd = 100;
         	Car_Move(CAR_LEFT, SPD_100);
             break;
         case 'E':
         	debug_current_spd = 50;
-			Car_Move(CAR_LEFT, SPD_50);
-			break;
+        	Car_Move(CAR_LEFT, SPD_50);
+        	break;
         case 'R':
         	debug_current_spd = 100;
         	Car_Move(CAR_RIGHT, SPD_100);
             break;
         case 'T':
         	debug_current_spd = 50;
-			Car_Move(CAR_RIGHT, SPD_50);
-			break;
+					Car_Move(CAR_RIGHT, SPD_50);
+					break;
         case 'S':
         	Car_Stop();
         	break;
         default:
-            break;
+          break;
     }
 }
 
@@ -160,6 +177,8 @@ static void DC_CONTROL_MANUAL_PERCENT(uint8_t cmd)
         case 'S':
         	Car_Stop();
         	actual_speed = 0;
+        	break;
+        case 'D':
         	break;
         default:
         	Car_Stop();
@@ -390,30 +409,47 @@ void DC_CONTROL_AUTO_PERCENT() {
 
 /* ================= MODE FLAG ================= */
 
-static bool st_auto = 0;
-static bool st_manual = 1;
-
 //*** AUTO MANUAL 판단 ***//
 void ST_FLAG(uint8_t cmd)
 {
-	if(cmd == 'A')
-	{
-		st_auto = 1;
-		st_manual = 0;
-		auto_st = AUTO_STATE_SCAN;
+    if (cmd == 'A')
+    {
+        if (st_auto)
+        {
+            // AUTO -> MANUAL
+            st_auto = 0;
+            st_manual = 1;
+            auto_st = AUTO_STATE_SCAN;
+            actual_speed = 0;
+            Car_Stop();
+        }
+        else
+        {
+            // MANUAL -> AUTO
+            st_auto = 1;
+            st_manual = 0;
+            auto_st = AUTO_STATE_SCAN;
+            actual_speed = 0;
+            Car_Stop();
+            Trace_ForceInit();   // auto에서는 trace 무조건 init
+        }
+    }
 
-		actual_speed = 0;
-	}
-	if(cmd == 'P')
-	{
-		Car_Stop();
-		st_auto = 0;
-		st_manual = 1;
-		auto_st = AUTO_STATE_SCAN;
+    if (cmd == 'P')
+    {
+        // 시스템 전체 초기화
+        Car_Stop();
 
-		actual_speed = 0;
+        st_auto = 0;
+        st_manual = 1;
+        auto_st = AUTO_STATE_SCAN;
 
-	}
+        actual_speed = 0;
+        current_speed = INIT_SPEED;
+
+        BMS_SAFETY_Reset();
+        Trace_ForceInit();
+    }
 }
 
 
@@ -432,7 +468,7 @@ const char* GetModeString(void)
 
 const char* GetTraceString(void)
 {
-    if (actual_speed == 0)
+    if (mode == MODE_ACT)
         return "ON";
     else
         return "OFF";
@@ -448,37 +484,12 @@ static void UpdateCurrentSpeed(void)
     BMS_SAFETY_UpdateSpeed(actual_speed, &current_speed);
 }
 
-
-static void TRACE_TASK(void)
-{
-    static uint32_t trace_sensor_time = 0;
-    static uint32_t trace_servo_time = 0;
-    uint32_t now = HAL_GetTick();
-
-    if (actual_speed != 0) return;
-
-    if ((now - trace_sensor_time) >= 50)
-    {
-        trace_sensor_time = now;
-        Sensor_Filter();
-        Sun_Position();
-        Target_Update();
-    }
-
-    if ((now - trace_servo_time) >= 20)
-    {
-        trace_servo_time = now;
-        Servo_Move();
-    }
-}
+/* ================= ST MACHINE ================= */
 
 void ST_MACHINE() {
 
-	/* temp는 stop / manual / auto 전부 공통 감시 */
-	BMS_SENSOR_Task();
-
-	/* danger 상태에 따른 속도 감속 */
-	UpdateCurrentSpeed();
+	BMS_SENSOR_Task(); // BMS state update(SAFE, WARNING, DANGER)
+	UpdateCurrentSpeed(); // update된 state 읽어서 current_speed 수정
 
 	// 새 UART 명령 수신 시, 계속 새로고침 (for UpdateCurrentSpeed)
 	if (rxFlag)
@@ -491,7 +502,7 @@ void ST_MACHINE() {
 	// MANUAL 모드: 마지막 주행 명령을 계속 유지하며 현재 속도로 재적용
 	if (st_manual == 1)
 	{
-			if (rxCmd != 'A' && rxCmd != 'P')
+			if (rxCmd != 'A' && rxCmd != 'P' && rxCmd != 'D')
 			{
 					DC_CONTROL_MANUAL_PERCENT(rxCmd);
 			}
@@ -500,8 +511,24 @@ void ST_MACHINE() {
 	if (st_auto == 1)
 	{
 		DC_CONTROL_AUTO_PERCENT();
+		Trace_ForceInit();   // auto에서는 무조건 init
 	}
 
-	TRACE_TASK();
+	// 주행 중이면 trace는 무조건 init
+	if (actual_speed != 0)
+	{
+			Trace_ForceInit();
+	}
+
+	// 정지 중이어도 warning 3단계 or danger면 무조건 init
+	if (actual_speed == 0)
+	{
+			if (GetWarningCount() >= 3 || HasDangerState() || IsDangerLatched())
+			{
+					Trace_ForceInit();
+			}
+	}
+
+	Trace_Mode();
 
 }

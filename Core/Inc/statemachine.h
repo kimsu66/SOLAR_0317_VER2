@@ -9,20 +9,14 @@
 #define INC_STATEMACHINE_H_
 
 #include <stdio.h>
+#include <stdbool.h>
 #include "stm32f4xx_hal.h"
-#include "speed.h"
-#include "direction.h"
+
 #include "car.h"
 #include "ultrasonic.h"
-#include "stdbool.h"
 
 // KSY
 #include "adc.h"
-#include "temp.h"
-#include "gas2.h"
-#include "ina219_bms.h"
-
-#include "bms_sensor.h"
 #include "bms_safety_manager.h"
 
 //LSH

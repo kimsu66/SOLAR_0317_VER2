@@ -1,4 +1,8 @@
-../Core/Src/trace.c:38:6:Sensor_Filter	7
-../Core/Src/trace.c:62:6:Sun_Position	1
-../Core/Src/trace.c:78:6:Target_Update	9
-../Core/Src/trace.c:111:6:Servo_Move	5
+../Core/Src/trace.c:16:6:Trace_ForceInit	1
+../Core/Src/trace.c:35:6:Sensor_Filter	3
+../Core/Src/trace.c:55:6:Sun_Position	1
+../Core/Src/trace.c:70:6:Target_Update	9
+../Core/Src/trace.c:92:6:Servo_Move	5
+../Core/Src/trace.c:107:6:Trace_Init	2
+../Core/Src/trace.c:121:6:Trace_Act	3
+../Core/Src/trace.c:150:6:Trace_Mode	3
