@@ -83,7 +83,7 @@ static void GAS_TASK(void)
     if ((now - gas_prev_tick) < gasTaskTick) return;
     gas_prev_tick = now;
 
-    gas_adc = Gas_ReadADC_Avg();
+    gas_adc = Gas_ReadADC();
     gas_state = Gas_GetLevelFromADC(gas_adc);
 }
 

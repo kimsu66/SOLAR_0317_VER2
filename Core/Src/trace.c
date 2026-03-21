@@ -1,7 +1,7 @@
 #include "trace.h"
 
-Mode mode = MODE_INIT;
 bool initflag = 0;
+Mode mode = MODE_INIT;
 
 extern uint16_t adcValue[6];
 uint16_t S1,S2,S3,S4;
@@ -13,10 +13,73 @@ uint16_t sum_array[6];
 uint16_t sensor_buffer[6][FILTER_SIZE];
 uint8_t filter_index = 0;
 
+static uint8_t trace_toggle_req = 0;
+
 void Trace_ForceInit(void)
 {
-    initflag = 0;
+		trace_toggle_req = 0;
+		initflag = 0;
     mode = MODE_INIT;
+}
+
+void Trace_RequestToggle(void)
+{
+    trace_toggle_req = 1;
+}
+
+const char* Trace_GetStateString(void)
+{
+    if (mode == MODE_ACT)
+        return "ACT";
+    else
+        return "INIT";
+}
+
+void Trace_Task(uint8_t is_manual,
+                uint8_t is_auto,
+                uint8_t actual_speed,
+                uint8_t warning_count,
+                uint8_t has_danger,
+                uint8_t danger_latched)
+{
+    /* 1. auto에서는 무조건 init */
+    if (is_auto)
+    {
+        Trace_ForceInit();
+        Trace_Mode();
+        return;
+    }
+
+    /* 2. 주행 중이면 무조건 init */
+    if (actual_speed != 0)
+    {
+        Trace_ForceInit();
+        Trace_Mode();
+        return;
+    }
+
+    /* 3. 정지 중이어도 warning 3단계 이상 / danger / latched danger면 init */
+    if (warning_count >= 3 || has_danger || danger_latched)
+    {
+        Trace_ForceInit();
+        Trace_Mode();
+        return;
+    }
+
+    /* 4. manual + 정지 + safe 상태일 때만 D 토글 허용 */
+    if (is_manual && trace_toggle_req)
+    {
+        initflag = !initflag;
+
+        if (initflag)
+            mode = MODE_ACT;
+        else
+            mode = MODE_INIT;
+
+        trace_toggle_req = 0;
+    }
+
+    Trace_Mode();
 }
 
 // 10개의 adc값을 모아서 개수만큼 나눈 평균값을 사용(노이즈 제거)

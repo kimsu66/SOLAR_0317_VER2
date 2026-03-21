@@ -68,22 +68,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         rxCmd = rxData[0];
         rxFlag = 1;
 
-        if (rxData[0] == 'D') // trace 제약조건 및 toggle 처
+        if (rxData[0] == 'D')
 				{
-						if (st_manual && actual_speed == 0 && GetWarningCount() < 3 && !HasDangerState() && !IsDangerLatched())
-						{
-								initflag = !initflag;
-						}
-						else
-						{
-								initflag = 0;
-						}
-
-						if (initflag)
-								mode = MODE_ACT;
-						else
-								mode = MODE_INIT;
+						Trace_RequestToggle();
 				}
+				else
+				{
+						rxCmd = rxData[0];
+						rxFlag = 1;
+				}
+
         // 다음 수신 대기
         HAL_UART_Receive_IT(&huart1, (uint8_t *)rxData, 1);
     }
@@ -470,10 +464,7 @@ const char* GetModeString(void)
 
 const char* GetTraceString(void)
 {
-    if (mode == MODE_ACT)
-        return "ON";
-    else
-        return "OFF";
+    return Trace_GetStateString();
 }
 
 uint8_t GetActualSpeed(void)
@@ -504,7 +495,7 @@ void ST_MACHINE() {
 	// MANUAL 모드: 마지막 주행 명령을 계속 유지하며 현재 속도로 재적용
 	if (st_manual == 1)
 	{
-			if (rxCmd != 'A' && rxCmd != 'P' && rxCmd != 'D')
+			if (rxCmd != 'A' && rxCmd != 'P')
 			{
 					DC_CONTROL_MANUAL_PERCENT(rxCmd);
 			}
@@ -513,24 +504,13 @@ void ST_MACHINE() {
 	if (st_auto == 1)
 	{
 		DC_CONTROL_AUTO_PERCENT();
-		Trace_ForceInit();   // auto에서는 무조건 init
 	}
 
-	// 주행 중이면 trace는 무조건 init
-	if (actual_speed != 0)
-	{
-			Trace_ForceInit();
-	}
-
-	// 정지 중이어도 warning 3단계 or danger면 무조건 init
-	if (actual_speed == 0)
-	{
-			if (GetWarningCount() >= 3 || HasDangerState() || IsDangerLatched())
-			{
-					Trace_ForceInit();
-			}
-	}
-
-	Trace_Mode();
+	Trace_Task(st_manual,
+						 st_auto,
+						 actual_speed,
+						 GetWarningCount(),
+						 HasDangerState(),
+						 IsDangerLatched());
 
 }

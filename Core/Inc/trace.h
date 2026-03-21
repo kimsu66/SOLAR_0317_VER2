@@ -33,9 +33,21 @@ extern int error_x;
 extern int error_y;
 
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
-void Trace_Mode();
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void Trace_ForceInit(void);
+void Trace_Mode();
+
+void Trace_RequestToggle(void);
+
+
+void Trace_Task(uint8_t is_manual,
+                uint8_t is_auto,
+                uint8_t actual_speed,
+                uint8_t warning_count,
+                uint8_t has_danger,
+                uint8_t danger_latched);
+
+const char* Trace_GetStateString(void);
 
 
 

@@ -1,4 +1,3 @@
-../Core/Src/bms_gas.c:25:10:Gas_ReadADC	4	static
-../Core/Src/bms_gas.c:30:10:Gas_ReadADC_Avg	16	static
-../Core/Src/bms_gas.c:42:12:Gas_GetLevelFromADC	16	static
-../Core/Src/bms_gas.c:49:12:Gas_TaskLevel	16	static
+../Core/Src/bms_gas.c:18:10:Gas_ReadADC	4	static
+../Core/Src/bms_gas.c:23:12:Gas_GetLevelFromADC	16	static
+../Core/Src/bms_gas.c:30:12:Gas_TaskLevel	16	static
