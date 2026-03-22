@@ -23,10 +23,12 @@
 #include "trace.h"
 
 
-#define Block_Distance_Front 35
-#define Block_Distance_Side 20
-#define Crash_Distance 10
-#define Stuck_Timeout 300
+//#define Block_Distance_Front 15
+//#define Block_Distance_Side 15
+//#define Crash_Distance 10
+//#define Stuck_Timeout 300
+//
+//#define TURN_THRESHOLD  20
 
 
 typedef enum

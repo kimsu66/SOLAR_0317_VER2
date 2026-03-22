@@ -7,4 +7,4 @@
 ../Core/Src/bms_ina219.c:103:9:INA219_BMS_ReadCurrent_mA	16	static
 ../Core/Src/bms_ina219.c:114:9:INA219_BMS_ReadVoltage_mV	24	static
 ../Core/Src/bms_ina219.c:134:15:INA219_BMS_GetCurrentState	16	static
-../Core/Src/bms_ina219.c:141:15:INA219_BMS_GetVoltageState	16	static
+../Core/Src/bms_ina219.c:143:15:INA219_BMS_GetVoltageState	16	static

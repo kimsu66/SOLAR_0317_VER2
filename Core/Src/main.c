@@ -167,9 +167,9 @@ int main(void)
   {
 
   	ST_MACHINE();
-//  	SHOW_UART2_ULTRASONIC();
+  	SHOW_UART2_ULTRASONIC();
 //  	SHOW_UART2_SPEED();
-  	SHOW_UART2_BMS();
+//  	SHOW_UART2_BMS();
   	SHOW_UART6_BMS();
 //  	SHOW_UART2_TRACE();
 

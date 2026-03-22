@@ -6,5 +6,5 @@
 ../Core/Src/bms_ina219.c:95:9:INA219_BMS_Init	3
 ../Core/Src/bms_ina219.c:103:9:INA219_BMS_ReadCurrent_mA	2
 ../Core/Src/bms_ina219.c:114:9:INA219_BMS_ReadVoltage_mV	3
-../Core/Src/bms_ina219.c:134:15:INA219_BMS_GetCurrentState	3
-../Core/Src/bms_ina219.c:141:15:INA219_BMS_GetVoltageState	5
+../Core/Src/bms_ina219.c:134:15:INA219_BMS_GetCurrentState	4
+../Core/Src/bms_ina219.c:143:15:INA219_BMS_GetVoltageState	6

@@ -117,7 +117,7 @@ static void SEND_BMS_STATUS(UART_HandleTypeDef *huart, uint32_t *prev_time)
     	                       "GAS:%s %u "
     	                       "VOLT:%s %ldmV "
     	                       "CUR:%s %ldmA\r\n"
-    	                       "<%s>\r\n",
+    	                       "<%s>",
     	                       GetModeString(),
     	                       GetActualSpeed(),
     	                       GetTraceString(),
@@ -154,7 +154,7 @@ static void SEND_BMS_STATUS(UART_HandleTypeDef *huart, uint32_t *prev_time)
                                "GAS:%s %u "
                                "VOLT:%s %ldmV "
                                "CUR:%s %ldmA\r\n"
-                               "<%s>\r\n",
+                               "<%s>",
                                GetModeString(),
                                GetActualSpeed(),
                                GetTraceString(),

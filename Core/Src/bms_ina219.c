@@ -9,11 +9,11 @@
 #define INA219_REG_CURRENT   0x04
 #define INA219_REG_CALIB     0x05
 
-#define CURRENT_WARNING 		1500
+#define CURRENT_WARNING 		1700
 #define CURRENT_DANGER	 		2500
 
-#define VOLTAGE_UNDER_DANGER		8000
-#define VOLTAGE_UNDER_WARNING		9000 // mV
+#define VOLTAGE_UNDER_DANGER		5000
+#define VOLTAGE_UNDER_WARNING		8000 // mV
 
 #define VOLTAGE_OVER_WARNING		12000
 #define VOLTAGE_OVER_DANGER			13200
@@ -133,6 +133,8 @@ int32_t INA219_BMS_ReadVoltage_mV(void)
 
 CURRENT_STATE INA219_BMS_GetCurrentState(int32_t current_mA)
 {
+		if (current_mA < 0) return CURRENT_STATE_SAFE;
+
 		if (current_mA >= CURRENT_DANGER) return CURRENT_STATE_DANGER;
     if (current_mA >= CURRENT_WARNING) return CURRENT_STATE_WARNING;
     return CURRENT_STATE_SAFE;
@@ -140,6 +142,8 @@ CURRENT_STATE INA219_BMS_GetCurrentState(int32_t current_mA)
 
 VOLTAGE_STATE INA219_BMS_GetVoltageState(int32_t voltage_mV)
 {
+		if (voltage_mV <= 0) 	return VOLTAGE_STATE_SAFE;
+
 		if (voltage_mV <= VOLTAGE_UNDER_DANGER) 	return VOLTAGE_STATE_UNDER_DANGER;
 		if (voltage_mV <= VOLTAGE_UNDER_WARNING) 	return VOLTAGE_STATE_UNDER_WARNING;
 
