@@ -7,10 +7,10 @@
 ../Core/Src/statemachine.c:217:6:SHOW_UART2_TRACE	3
 ../Core/Src/statemachine.c:239:6:DC_CONTROL_AUTO	28
 ../Core/Src/statemachine.c:320:6:DC_CONTROL_AUTO_PERCENT	28
-../Core/Src/statemachine.c:406:6:DC_CONTROL_AUTO_PERCENT_2	29
-../Core/Src/statemachine.c:575:6:ST_FLAG	4
-../Core/Src/statemachine.c:624:13:GetModeString	2
-../Core/Src/statemachine.c:632:13:GetTraceString	1
-../Core/Src/statemachine.c:637:9:GetActualSpeed	1
-../Core/Src/statemachine.c:642:13:UpdateCurrentSpeed	1
-../Core/Src/statemachine.c:649:6:ST_MACHINE	6
+../Core/Src/statemachine.c:404:6:DC_CONTROL_AUTO_PERCENT_2	16
+../Core/Src/statemachine.c:475:6:ST_FLAG	4
+../Core/Src/statemachine.c:524:13:GetModeString	2
+../Core/Src/statemachine.c:532:13:GetTraceString	1
+../Core/Src/statemachine.c:537:9:GetActualSpeed	1
+../Core/Src/statemachine.c:542:13:UpdateCurrentSpeed	1
+../Core/Src/statemachine.c:549:6:ST_MACHINE	6

@@ -25,7 +25,7 @@ static bool st_manual = 1;
 // ADC value
 uint16_t adcValue[6];
 
-#define INIT_SPEED 	90
+
 int8_t current_speed = INIT_SPEED;
 
 static uint8_t actual_speed = 0;         // 실제 출력중인 속도
@@ -368,8 +368,8 @@ void DC_CONTROL_AUTO_PERCENT() {
             // 일반 주행 및 벽 거리 멀어지게
             else {
                 // 벽에 너무 가까우면 회피
-                if (DisLeft < 25)       {Car_MovePercent(CAR_RIGHT, current_speed); actual_speed = current_speed;}
-                else if (DisRight < 25) {Car_MovePercent(CAR_LEFT, current_speed); actual_speed = current_speed;}
+                if (DisLeft < 15)       {Car_MovePercent(CAR_RIGHT, current_speed); actual_speed = current_speed;}
+                else if (DisRight < 15) {Car_MovePercent(CAR_LEFT, current_speed); actual_speed = current_speed;}
 
                 // 2. [사용자님 아이디어] 한쪽이 60 이상 넓게 뚫려 있다면 미리 몸을 틀어 코너 대비
                 else if (DisLeft >= 70 && DisRight < 70) {Car_MovePercent(CAR_LEFT, current_speed); actual_speed = current_speed;}
@@ -401,179 +401,72 @@ void DC_CONTROL_AUTO_PERCENT() {
     }
 }
 
-static int8_t avoid_dir = 0;   // -1: LEFT, 1: RIGHT, 0: none
-
-#define Block_Distance_Front 50
-#define Block_Distance_Side 15
-#define Crash_Distance 10
-#define Stuck_Timeout 300
-
-#define TURN_THRESHOLD  20
-
 void DC_CONTROL_AUTO_PERCENT_2(void)
 {
     Ultrasonic_TriggerAll();
-    uint32_t current_Tick = HAL_GetTick();
 
     uint8_t L = Ultrasonic_GetDistanceCm(US_LEFT);
     uint8_t C = Ultrasonic_GetDistanceCm(US_CENTER);
     uint8_t R = Ultrasonic_GetDistanceCm(US_RIGHT);
 
-    // 100 이상의 거리는 100으로 통일
+    // 100 이상의 거리, 0 측정 실패는 100으로 통일
     uint8_t DisLeft   = (L == 0 || L > 100) ? 100 : L;
     uint8_t DisCenter = (C == 0 || C > 100) ? 100 : C;
     uint8_t DisRight  = (R == 0 || R > 100) ? 100 : R;
 
-    switch (auto_st)
+    // 1. 완전 막힘 -> BACK
+    if (DisCenter < BACK_DIST &&
+        (DisLeft < BACK_DIST || DisRight < BACK_DIST))
     {
-        case AUTO_STATE_SCAN:
+        Car_MovePercent(CAR_BACK, current_speed);
+        actual_speed = current_speed;
+    }
+    // 2. 좌우 좁음 -> 피하기
+    else if (DisLeft < LRTH)
+    {
+        Car_MovePercent(CAR_RIGHT, current_speed);
+        actual_speed = current_speed;
+    }
+    else if (DisRight < LRTH)
+    {
+        Car_MovePercent(CAR_LEFT, current_speed);
+        actual_speed = current_speed;
+    }
+    // 3. 앞 여유 -> FRONT
+    else if (DisCenter >= CRITICAL_DIST)
+    {
+        Car_MovePercent(CAR_FRONT, current_speed);
+        actual_speed = current_speed;
+    }
+    // 4. 좌우 차이 판단
+    else
+    {
+        if (DisLeft > DisRight + TURN_THRESHOLD)
         {
-            // 1. 완전 막힘 -> BACK
-            if (DisCenter < Crash_Distance &&
-                (DisLeft < Crash_Distance || DisRight < Crash_Distance))
-            {
-                Car_MovePercent(CAR_BACK, current_speed);
-                actual_speed = current_speed;
-                auto_tick = current_Tick;
-                auto_st = AUTO_STATE_BACK;
-                avoid_dir = 0;
-            }
-            // 2. 오른쪽 벽이 너무 가까움 -> 왼쪽 회전 시작
-            else if (DisRight < Block_Distance_Side)
-            {
-                Car_MovePercent(CAR_LEFT, current_speed);
-                actual_speed = current_speed;
-                auto_tick = current_Tick;
-                auto_st = AUTO_STATE_AVOID;
-                avoid_dir = -1;
-            }
-            // 3. 왼쪽 벽이 너무 가까움 -> 오른쪽 회전 시작
-            else if (DisLeft < Block_Distance_Side)
-            {
-                Car_MovePercent(CAR_RIGHT, current_speed);
-                actual_speed = current_speed;
-                auto_tick = current_Tick;
-                auto_st = AUTO_STATE_AVOID;
-                avoid_dir = 1;
-            }
-            // 4. 앞이 충분히 열려 있음 -> 직진
-            else if (DisCenter >= Block_Distance_Front)
-            {
-                Car_MovePercent(CAR_FRONT, current_speed);
-                actual_speed = current_speed;
-                avoid_dir = 0;
-            }
-            // 5. 앞은 애매함 -> 좌우 비교해서 넓은 쪽으로 회전 시작
-            else
-            {
-                int diff = (int)DisLeft - (int)DisRight;
-
-                if (diff > TURN_THRESHOLD)
-                {
-                    Car_MovePercent(CAR_LEFT, current_speed);
-                    actual_speed = current_speed;
-                    auto_tick = current_Tick;
-                    auto_st = AUTO_STATE_AVOID;
-                    avoid_dir = -1;
-                }
-                else if (diff < -TURN_THRESHOLD)
-                {
-                    Car_MovePercent(CAR_RIGHT, current_speed);
-                    actual_speed = current_speed;
-                    auto_tick = current_Tick;
-                    auto_st = AUTO_STATE_AVOID;
-                    avoid_dir = 1;
-                }
-                else
-                {
-                    if (DisLeft >= DisRight)
-                    {
-                        Car_MovePercent(CAR_LEFT, current_speed);
-                        actual_speed = current_speed;
-                        avoid_dir = -1;
-                    }
-                    else
-                    {
-                        Car_MovePercent(CAR_RIGHT, current_speed);
-                        actual_speed = current_speed;
-                        avoid_dir = 1;
-                    }
-
-                    auto_tick = current_Tick;
-                    auto_st = AUTO_STATE_AVOID;
-                }
-            }
-            break;
-        }
-
-        case AUTO_STATE_AVOID:
-        {
-            // 회전 유지
-            if (avoid_dir < 0)
-            {
-                Car_MovePercent(CAR_LEFT, current_speed);
-                actual_speed = current_speed;
-
-                // 종료 조건:
-                // 1) 정면이 열렸고
-                // 2) 오른쪽 벽이 너무 가까운 상황이 해소됐거나
-                // 3) 일정 시간 이상 돌았으면 종료 <- 이걸 delete..?
-                if ((DisCenter >= Block_Distance_Front && DisRight >= Block_Distance_Side) ||
-                    (current_Tick - auto_tick >= 80))
-                {
-                    auto_st = AUTO_STATE_SCAN;
-                    avoid_dir = 0;
-                }
-            }
-            else if (avoid_dir > 0)
-            {
-                Car_MovePercent(CAR_RIGHT, current_speed);
-                actual_speed = current_speed;
-
-                // 종료 조건:
-                // 1) 정면이 열렸고
-                // 2) 왼쪽 벽이 너무 가까운 상황이 해소됐거나
-                // 3) 일정 시간 이상 돌았으면 종료
-                if ((DisCenter >= Block_Distance_Front && DisLeft >= Block_Distance_Side) ||
-                    (current_Tick - auto_tick >= 80))
-                {
-                    auto_st = AUTO_STATE_SCAN;
-                    avoid_dir = 0;
-                }
-            }
-            else
-            {
-                auto_st = AUTO_STATE_SCAN;
-            }
-            break;
-        }
-
-        case AUTO_STATE_BACK:
-        {
-            Car_MovePercent(CAR_BACK, current_speed);
+            Car_MovePercent(CAR_LEFT, current_speed);
             actual_speed = current_speed;
-
-            if (current_Tick - auto_tick >= 250)
-            {
-                Car_Stop();
-                actual_speed = 0;
-                auto_st = AUTO_STATE_SCAN;
-                avoid_dir = 0;
-            }
-            break;
         }
-
-        case AUTO_STATE_STOP:
-        default:
+        else if (DisRight > DisLeft + TURN_THRESHOLD)
         {
-            Car_Stop();
-            actual_speed = 0;
-            auto_st = AUTO_STATE_SCAN;
-            avoid_dir = 0;
-            break;
+            Car_MovePercent(CAR_RIGHT, current_speed);
+            actual_speed = current_speed;
+        }
+        else
+        {
+            if (DisLeft > DisRight)
+            {
+                Car_MovePercent(CAR_LEFT, current_speed);
+                actual_speed = current_speed;
+            }
+            else
+            {
+                Car_MovePercent(CAR_RIGHT, current_speed);
+                actual_speed = current_speed;
+            }
         }
     }
 }
+
 
 
 /* ================= MODE FLAG ================= */

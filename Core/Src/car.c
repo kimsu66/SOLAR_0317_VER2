@@ -101,12 +101,12 @@ void Car_MovePercent(car_state_t state, uint8_t percent)
             break;
 
         case CAR_LEFT:
-            Direction_Set(DIR_FRONT);
+            Direction_Set(DIR_LEFT);
             Speed_SetPercentBoth(percent, 0);
             break;
 
         case CAR_RIGHT:
-            Direction_Set(DIR_FRONT);
+            Direction_Set(DIR_RIGHT);
             Speed_SetPercentBoth(0, percent);
             break;
 
